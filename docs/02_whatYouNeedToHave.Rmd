@@ -1,0 +1,39 @@
+---
+title: "What must you have to use EZfate?"
+author: "James Pringle"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+To use EZfate to estimate particle dispersal from pre-computed particle tracks, you need to set up three things. 
+
+**First**, you must have these files:
+
+- model_depth_and_distance.nc, a file which contains the location of all $\rho$ points in the Mercator global 1/12th of a degree model, and the depth, distance from land in kilometers and distance from land in grid spacing for all gridpoints in the model. 
+- The following R files: connectivityUtilities.R and getConnectivityData.R
+
+These files can be retrived from <https://github.com/JamiePringle/EZfate> or downloaded along with this tutorial from **in future, link to release**.
+
+**Second**: you need to decide upon a directory to store all the connectivity data. In all of the examples below, this is a directory called "theTestData" that is kept in the same directory as the *.R files. 
+
+**Third**: You need to make sure that the following libraries are installed and work:
+
+To test this after installing these packages, run the code block above, and make sure it works. Don't worry about the tidyverse conflicts. 
+```{r libraryLoad}
+library(ncdf4)
+library(tidyverse)
+library(sf)
+library(collections)
+library(furrr) #optional, but highly recommend to allow parallel processing
+library(tictoc) #optional, only needed for debugging runs
+library(rnaturalearth) #only needed for graphics 
+library(rnaturalearthdata) #only needed for graphics
+
+```
+Several issues have come up for users when installing these packages. First, read any error messages that occur during installation. Often, especially on linux, they will suggest installing additional system libraries. Second, if you are using "conda" to manage python installations, make sure that you have no conda environments enabled. Having a conda environment installed when running R can lead to issues when installing these libraries associated the operating system, R and python having different versions of libraries such as gdal and proj. 
+
+**In the next section, you will learn how to get the connectivity data and subset it to your region of interest, and combine multiple connectivity data sets.**
