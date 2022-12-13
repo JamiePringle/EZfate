@@ -78,7 +78,7 @@ getConnectivityData<-function(dataDir,regionName,depth,year,verticalBehavior,mon
     print(paste('file',downloadToFile,'exists, no download'))
   } else{
     options(timeout = max(3000, getOption("timeout")))
-    download.file(dataURL,downloadToFile)
+    download.file(dataURL,downloadToFile,mode='wb')
   }
   
   #load the data.frame and return it
