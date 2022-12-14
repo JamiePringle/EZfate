@@ -86,6 +86,27 @@ getConnectivityData<-function(dataDir,regionName,depth,year,verticalBehavior,mon
   return(E)
 }
 
+getGridData<-function(dataDir){
+  #this code gets the model grid data file. It has one arguement, dataDir, 
+  #which should be the same as the argument to getConnectivityData()  
+  dirName<-file.path(dataDir,'EZfateFiles')
+  downloadToFile<-file.path(dataDir,'model_depth_and_distance.nc')
+  
+  if (!dir.exists(dirName)){
+    print(paste('creating directory',dirName))
+    dir.create(dirName,recursive=TRUE)
+  }
+  
+  #download file to downloadToFile if it does not exist
+  if (file.exists(downloadToFile)) {
+    print(paste('file',downloadToFile,'exists, no download'))
+  } else{
+    options(timeout = max(3000, getOption("timeout")))
+    download.file(dataURL,downloadToFile,mode='wb')
+  }
+  
+  
+  }
 
 #====================================================================================
 #the following is test code. Set conditional to false to use this as a module
