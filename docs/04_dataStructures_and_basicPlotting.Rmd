@@ -43,9 +43,10 @@ Now lets look at where all the particles released in a small region go in the 18
   limitPoly=st_polygon(list(cbind(lonLimits[c(1,2,2,1,1)],latLimits[c(1,1,2,2,1)])))
   limitPoly<-st_sfc(limitPoly,crs=4326) #make into a surface, 4326 is WGS84
 ```
-Now further subset E to only include particle starting location. Set `trimTo` to `FALSE` so we also include particles that leave the starting locations. Because `subsetConnectivity_byPolygon()` comes from the `connectivityUtilities`, we must source that file to load the functions in it. 
+Now further subset E to only include particle starting location. Set `trimTo` to `FALSE` so we also include particles that leave the starting locations. Because `subsetConnectivity_byPolygon()` comes from the `connectivityUtilities.R`, we must define where the data is by defining `dataDir` and source `connectivityUtilities.R` to load the functions in it. 
 ``` {r subsetStarts}
   #subset connectivity data
+  dataDir<-'theTestData'
   source('connectivityUtilities.R')
   EstartPoints<-subsetConnectivity_byPolygon(E,limitPoly,trimTo=FALSE)
 ```

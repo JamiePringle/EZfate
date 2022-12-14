@@ -32,10 +32,15 @@ if (TRUE) {
 #water depth or distance from land.
 
 
-#define where the grid file is and load it
-#gridFile='ext-PSY4V3R1_mesh_zgr.nc'
-gridFile<-'model_depth_and_distance.nc'
-data<-nc_open(gridFile)
+#source getConnectivityData.R and use the getGridData() function to download
+#and access the grid data. THIS CODE ASSUMES THAT THE dataDir VARIABLE HAS 
+#BEEN DEFINED. 
+if (!exists('dataDir')) {
+  print('the dataDir variable must be defined before sourcing connectivityUtilities.R')
+  stop('variable dataDir not defined')
+}
+source('getConnectivityData.R')
+data<-getGridData(dataDir)
 
 lon<-ncvar_get(data,'nav_lon')
 lat<-ncvar_get(data,'nav_lat')

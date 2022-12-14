@@ -16,7 +16,8 @@ E<-readRDS('mayJuneEastCoast_connectivity.RDS')
 
 The connectivity data described above extends to the greater of 100km from land and 500m water depth and a global alongshore extent. Many marine organisms will have different habitats, and can only spread from where they do live to a location where they might live. So in any analysis of connectivity, the connectivity must be limited to the region that is habitable to the species in question. In the `connectivityUtilities.R` there are routines to limit the habitat to within a polygon (as described in `03_GetData_Subset_and_Combine.RMD`), to a certain distance from land in kilometers, to a certain distance from land in model grid-points, and to a certain depth range. To use these routines, `connectivityUtilities.R` must be sourced:
 ```{r sourceConnectivityUtilties.R}
-source('connectivityUtilities.R')
+  dataDir<-'theTestData'
+  source('connectivityUtilities.R')
 ```
 Besides defining the functions we need to subset the habitat, it also defines three matrices that give the water depth on the model grid (`gridDepth`), the distance from land in kilometers (`gridDistKm`) and in model grid cells (`gridDist`). As an example of how to plot this data, here we sample the distance from land at the starting locations of the connectivity data E, and plot it:
 ```{r showDepth}

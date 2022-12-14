@@ -88,9 +88,11 @@ getConnectivityData<-function(dataDir,regionName,depth,year,verticalBehavior,mon
 
 getGridData<-function(dataDir){
   #this code gets the model grid data file. It has one arguement, dataDir, 
-  #which should be the same as the argument to getConnectivityData()  
+  #which should be the same as the argument to getConnectivityData(). It returns
+  #the variable associated with the netCDF file. 
   dirName<-file.path(dataDir,'EZfateFiles')
-  downloadToFile<-file.path(dataDir,'model_depth_and_distance.nc')
+  downloadToFile<-file.path(dataDir,'EZfateFiles','model_depth_and_distance.nc')
+  dataURL<-paste(rootDataURL,'EZfateFiles/model_depth_and_distance.nc',sep='')
   
   if (!dir.exists(dirName)){
     print(paste('creating directory',dirName))
@@ -105,7 +107,8 @@ getGridData<-function(dataDir){
     download.file(dataURL,downloadToFile,mode='wb')
   }
   
-  
+  data<-nc_open(downloadToFile)
+  return(data)
   }
 
 #====================================================================================

@@ -59,7 +59,7 @@ E2<-getConnectivityData(dataDir,regionName,depth,year,verticalBehavior,month,min
 
 # Add latitude and longitude data
 
-To save disk space, and to reduce the amount of data to be transfered across the network, the latitude and longitude data is not included in the connectivity data -- instead, the data is all stored as indices to the circulation model grid. However, for manipulating the connectivity and plotting it, it is necessary to have the latitude and longitude data. So we must add it, using the `addLatLon()` function in the `connectivityUtilities.R` file. So we source `connectivityUtilities.R` to add its functions, and use `addLatLon()` to add latitude and longitude to each connectivity data set. 
+To save disk space, and to reduce the amount of data to be transfered across the network, the latitude and longitude data is not included in the connectivity data -- instead, the data is all stored as indices to the circulation model grid. However, for manipulating the connectivity and plotting it, it is necessary to have the latitude and longitude data. So we must add it, using the `addLatLon()` function in the `connectivityUtilities.R` file. So we source `connectivityUtilities.R` to add its functions, and use `addLatLon()` to add latitude and longitude to each connectivity data set. **Before this is done, the `dataDir` variable must be defined to give location of the directory that stores the model grid and connectivity data!** This was done above, when the connectivity data was downloaded. 
 ```{r addLatLon}
   source('connectivityUtilities.R')
   E1<-addLatLon(E1)
