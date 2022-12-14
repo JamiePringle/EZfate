@@ -1,0 +1,116 @@
+---
+title: "Get Connectivity Data, Combine, and Subset it to a region"
+author: "James Pringle"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+**An important note**: In this section we read in the connectivity data, process it, and save it to a directory. To do so, the code must read the data in `model_depth_and_distance.nc` and save the data we download into predictable places. To do this, it is **important** that you run the code in a predictible way from a known location. In Rstudio, the easiest way to do this is to go to the "Session" menu, "Set Working Directory" item, and choose "To Source File Location."  Your data files will then be saved into the directory this file is in, and the code will find the `model_depth_and_distance.nc` in the `connectivityData` directory within it. You can also explicitly call the setwd() function. 
+
+The functions to retrieve the connectivity data is contained in the file `getUtilities.R`, so we must source that file to load the functions  into R. If you look at this file, you will see where the data is stored on the web. 
+```{r sourceTheCode}
+source('connectivityUtilities.R')
+```
+
+Once this is done, you will see the function `getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD,dataDir='connecivityData')` defined. This function checks to see if the requested data has been downloaded and placed in `dataDir`. If it has, it reads it from `dataDir` and returns it. If it has not, it downloads it from the servers at the University of New Hampshire into `dataDir` and then loads it. *If the data is ever updated on the server* you must delete it from `dataDir` to get the new data. 
+
+The function `getConnectivityData` takes the following arguements:
+
+- `regionName``: A string. To improve download speed, the connectivity data is broken into regions. The github page for EZfate specifies what regions exist. 
+- `depth`: An integer. The depth the particles start at. Since the particle tracks have already been created, you can only choose ones that exist on the server. These are given on the EZfate github page.  
+- `year`: This is either an integer for the year (For example, 2007), or the string "climatology" if you prefer the particle tracks for all years that have been run. Again, see the github page for the details. 
+- `verticalBehavior`: A string that can be "fixed" for particles that stay at their starting depth, or "starts" for those that can be advected vertically. Other vertical behaviors may be added in the future. See the github page for what has been done. 
+- `month`: The month the particles have been released over. 
+- `minPLD`: The time the particles drift with the currents. 
+- `maxPLD`: The time the particles drift with the currents. For now, should be the same as `minPLD`. 
+- `dataDir`: A string that defaults to 'connectivityData`. The directory to save the data in. If you do not give it an absolute path (e.g. '/home/name/..' or 'C:\some\path\name'), it will be saved in the same directory as this file. If you are ok with the default, you may choose to not provide this argument. 
+
+So lets get the climatological data for particles released around North and South America in May at 1m, and forced to stay at that depth for the 18 day duration of their drifting. The data is stored in the sub-directory to this directory "theTestData". 
+
+You **must** create the directory "theTestData" in the same directory as this file, and use the Rstudio option in the "Session" menu to "Set Working Directory..." to "To Source File Location".
+
+The first time you run this, it will download the data. After that it will just read it from the local copy. 
+``` {r getData}
+  regionName<-'theAmericas'
+  depth<-1
+  year<-'climatology'
+  verticalBehavior<-'fixed'
+  month<-5
+  minPLD<-18; maxPLD<-minPLD
+  E1<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
+```
+
+You will notice the data.frame `E1` in the workspace, with a large number of observations and six variables. The structure of this data will be discussed in the next section, but for now it is worth noting that it is **big**, but (if you look at it), it does not have any latitude of longitude data. It is only for a single month, May (month 5). Lets pretend that the critter we are studying releases larvae in May and June. So in the rest of this section we will:
+
+- Read in the data for June.
+- Add latitude and longitude to the data. 
+- Subset the data so only data from the tip of Florida to the Gulf of Maine is retained (as it is, we have loaded data for all of North and South America)
+- Combine the two months into a single connectivity data set. Note that this is time consuming, so it is best done *after* subsetting the data. 
+- Finally, we will save this new data set so we don't have to do this again and again later. 
+
+# Get the June data
+
+This is the same as getting the may data, but we change the `month` variable to 6. The rest need not be defined since they were defined above. The June data is stored in the data.frame `E2`. 
+```{r getMoreData}
+month<-6
+E2<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
+```
+
+# Add latitude and longitude data
+
+To save disk space, and to reduce the amount of data to be transfered across the network, the latitude and longitude data is not included in the connectivity data -- instead, the data is all stored as indices to the circulation model grid. However, for manipulating the connectivity and plotting it, it is necessary to have the latitude and longitude data. So we must add it, using the `addLatLon()` function in the `connectivityUtilities.R` file.  
+```{r addLatLon}
+  E1<-addLatLon(E1)
+  E2<-addLatLon(E2)
+``` 
+
+We will discuss how the connectivity data in E1 and E2 is organized and how to plot it in the next section (`04_dataStructure_andBasicPlotting.RMD` **CHECK**), but lets make a quick plot of the spatial extent of E1 and E2 here so you can see what you have:
+```{r plotEntireDomain}
+    library("rnaturalearth")
+    library("rnaturalearthdata")
+    world <- ne_countries(scale = "medium", returnclass = "sf") #get coastline data
+    class(world)
+     
+    #plot(limitPoly)
+    p<-ggplot(data = world) + geom_sf() +
+      coord_sf(xlim= c(-170, -22), ylim = c(-70, 80), expand = FALSE)+
+      geom_point(data = E1, aes(x = lonFrom, y = latFrom), size = 1, shape = 23, fill = "green",color='green')
+    print(p) #this makes the figure appear
+```
+
+# Subset data with a polygon, then plot the polygon and the starting points
+
+The full american dataset has 164,701 starting points, and manipulating all of them can be slow and awkward. So the connectivityUtilities.R file has routines to take subsets of the connectivity data in many ways. Here the data is trimmed to only include points within a polygon that contains the East Coast of North America from Miami to the Gulf of Maine. We start by defining two vectors, `lonPoly` and `latPoly`, that contain the points that define the polygon -- these were obtained from Google maps. These are then mapped to a polygon using the WGS84 datum using the st_ functions. **Note that the first and last points of the polygon must be the same, to close the polygon.**
+```{r makePoly}
+  latPoly<-c(25.0,38.2,46.47,45.21,44.21,27.95,25.12,25.0)
+  lonPoly<-c(-80.5,-85.5,-65.42,-62.57,-65.47,-73.86,-79.53,-80.5)
+  limitPoly=st_polygon(list(cbind(lonPoly,latPoly)))
+  limitPoly<-st_sfc(limitPoly,crs=4326) #make into a surface, 4326 is the code for the WGS84 datum in proj
+```
+Now the `subsetConnectivity_byPolygon()` function can be used to remove all points that do not lie within the polygon. It can be set so that we do not include points that leave the polygon (`trimTo=TRUE`) or to include them (`trimTo=True`). The implications of this will be discussed below, but for now, lets include connectivity that starts within the polygon but then leaves it. 
+```{r trimConnectivity}
+  E1<-subsetConnectivity_byPolygon(E1,limitPoly,trimTo=FALSE)
+  E2<-subsetConnectivity_byPolygon(E2,limitPoly,trimTo=FALSE)
+```
+And now lets plot the starting points that remain, along with the polygon in red, to see what we have left
+```{r plotTrimmed}
+    p<-ggplot(data = world) + geom_sf() + geom_sf(data=limitPoly,fill=NA,color='red') + #add limit polygon
+      coord_sf(xlim= c(-85, -60), ylim = c(23, 48), expand = FALSE)+
+      geom_point(data = E1, aes(x = lonFrom, y = latFrom), size = 1, shape = 23, fill = "green",color='black')
+    print(p) #this makes the figure appear
+```
+# Combine data
+
+Now we have two months of connectivity in two data.frames, `E1` and `E2`. We would like to combine them into a single data.frame `E` using the `combineConnectivity()` function in `connectivityUtilities.R`. This can take a while, especially for big connectivity data.frames. This is why we subset the data before combining it. 
+```{r combineData}
+E<-combineConnectivityData(E1,E2)
+```
+
+# Save combined data
+
+Since loading, trimming and combining the data takes a significant amount of time, it is useful to save the connectivity data in `E` to a .RDS file, so we can just reload it in the later work. This file is called, entirely arbitrarily, `mayJuneEastCoast_connectivity.RDS`.
+``` {r saveData}
+  saveRDS(E,file='mayJuneEastCoast_connectivity.RDS')
+```
+
+**In the next section, `04_dataStructure_and_basicPlotting.RMD`, the contents of the connectivity data.frame `E` will be described, and it will be shown how to plot basic dispersal plots.**
