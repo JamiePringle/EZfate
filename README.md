@@ -13,4 +13,4 @@ The precomputed pathways were made with software from the OceanParcels project (
 
 The current available data include the coastal oceans of North and South America for all 1/12° separated points from the coast to either depths up to 500m deep or 100km from the coast, whichever is greater. Future data releases will be global. 
 
-
+For instructions on how to download and use this code, go to [the instructions in the code directory](https://jamiepringle.github.io/EZfate/)
