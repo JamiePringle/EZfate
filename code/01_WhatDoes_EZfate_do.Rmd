@@ -27,4 +27,6 @@ To quickly see what you need to do generate these figures, and to adapt this res
 - [**05_connectivityModeling**](05_connectivityModeling.html): The particle fate data obtained above can be used to model the dispersal of particles over multiple releases in a defined habitat. This can be used to model connectivity of marine populations. How to define a habitat and model dispersal is described here for a simple 1 species model with no density dependence. 
 - **06_backwardsInTimeModeling**: Often it will be important to understand where particles which have arrived at a specific place came from. This describes how to start doing this. *This has not yet been finished*
 
+To download the code to run it locally, go to the [gitHub directiory](https://github.com/JamiePringle/EZfate) and look at the right-hand side toolbar for the "Releases" tab and click on the green "latest" button, or go [to this page.](https://github.com/JamiePringle/EZfate/releases/)
+
 **In the next section, you will learn what R packages must be installed to use EZfate.**
