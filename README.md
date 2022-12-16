@@ -5,7 +5,7 @@
 
 ## Software for analysis of precomputed Lagrangian Pathways from Mercator 1/12th degree ocean model
 
-This repository contains code for analyzing precomputed Lagrangian pathways in the coastal ocean from the System For Global Ocean Physical Analysis At 1/12° as described [in this data sheet](https://www.mercator-ocean.eu/wp-content/uploads/2017/02/SYSTEM-sheet-_PSY4V3R1_2017.pdf). The particle tracking was made with oceanParcels, a python package described in at [oceanparcels.org](oceanparcels.org).
+This repository contains code for analyzing precomputed Lagrangian pathways in the coastal ocean from the System For Global Ocean Physical Analysis At 1/12° as described [in this data sheet](https://www.mercator-ocean.eu/wp-content/uploads/2017/02/SYSTEM-sheet-_PSY4V3R1_2017.pdf). The particle tracking was made with oceanParcels, a python package described in at [oceanparcels.org](https://oceanparcels.org/).
 
 For instructions on how to download and use this code, go to [the instructions in the docs directory](https://jamiepringle.github.io/EZfate/)
 
