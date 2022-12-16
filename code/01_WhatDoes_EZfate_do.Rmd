@@ -12,12 +12,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Would you, without running your own regional numerical ocean circulation model or downloading terrabytes of numerical ocean circulation model output, like to:
 
-- See where all particles that left a place in the global coastal ocean (say Portsmouth NH) and drift at the surface (or some other depth) for 30 days go? *Figure, no code*
-- Do you want to know where all particles that left from within some distance of the coast and ended up at Portsmouth NH started? *Figure, no code*
-- Do you want to know if larvae were released at Portsmouth NH, and allowed to settle in coastal habitat for 5 generations, where would they end up? Where would their density be greatest? *Figure, no code*
+- See where all particles that left a place in the global coastal ocean (say Portsmouth NH) and drift at the surface (or some other depth) for 30 days go? 
+- Do you want to know where all particles that left from within some distance of the coast and ended up at Portsmouth NH started? 
+- Do you want to know if larvae were released at Portsmouth NH, and allowed to settle in coastal habitat for 5 generations, where would they end up? Where would their density be greatest? 
 - **IMPORTANT**: Right now this is in development, and the interface may change. Also, at least at first, a limited number of release depths, vertical behaviors, and, perhaps most importantly, regions will be included. Right now, data is only available for North and South America, as will be shown below. When the code is ready to released, the rest of the globe will be simulated. 
 
-All this can be done with pre-computed particle tracks from the Mercator 1/12th of degree global ocean model, as described in (INSERT CITATION HERE). For details of dates included, depths released and depth behaviors simulated, see the current github repository at <https://github.com/JamiePringle/EZfate>.
+All this can be done with pre-computed particle tracks from the Mercator 1/12th of degree global ocean model, as described in [in this data sheet](https://www.mercator-ocean.eu/wp-content/uploads/2017/02/SYSTEM-sheet-_PSY4V3R1_2017.pdf). The particle tracking was made with oceanParcels, a python package described in at [oceanparcels.org](https://oceanparcels.org/). For details of dates included, depths released and depth behaviors simulated, see the current github repository at <https://github.com/JamiePringle/EZfate>.
 
 To quickly see what you need to do generate these figures, and to adapt this resource to your needs, the following R notebooks are provided. If you want to get a quick glimpse of the capabilities of this code, you can skip ahead to notebook 04 and the following notebooks. But if you want to use this code, please go through them carefully and in order through at least notebook 6. 
 
