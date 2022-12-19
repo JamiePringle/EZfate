@@ -9,9 +9,11 @@ This repository contains code for analyzing precomputed Lagrangian pathways in t
 
 For instructions on how to download and use this code, go to [the instructions in the docs directory](https://jamiepringle.github.io/EZfate/)
 
-Currently, the data and software will produce estimates of connectivity for indvidual months and climatological months for particles released at 1m, 20m, and 40m depths and drifting for 2, 4, 8 ... 60 days. The particles can either be fixed to their initial depth or allowed to advect to different depths. In the future more depths will be added, along with the vertical dispersal of particles by turbulence as computed by the ocean model. 
+Currently, the data and software will produce estimates of connectivity for indvidual months and climatological months for particles released at 1m, 10m, 20m, and 40m depths and drifting for 2, 4, 8 ... 60 days. The particles can either be fixed to their initial depth or allowed to advect to different depths by the grid-scale vertical velocity. In the future more depths will be added, along with the vertical dispersal of particles by turbulence as computed by the ocean model. 
 
-The precomputed pathways were made with software from the OceanParcels project (https://oceanparcels.org).  It currently includes the years 2007-2020, but will extended to include through 2022 by the end of the first quarter of 2023.  This work is supported by NSF project OCE 1947954.  
+Pathways have been calculated for the years 2007-2020, but will extended to include through 2022 by the end of the first quarter of 2023.  
 
-The current available data include the coastal oceans of North and South America for all 1/12° separated points from the coast to either depths up to 500m deep or 100km from the coast, whichever is greater. Future data releases will be global. 
+The current available data include the coastal oceans of North and South America for all 1/12° separated points from the coast to either depths up to 500m deep or 100km from the coast, whichever is greater. Future data releases will be global (Summer 2022). 
+
+This work is supported by NSF project OCE 1947954.  
 
