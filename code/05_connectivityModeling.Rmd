@@ -5,7 +5,9 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-Often we will want to model the dispersal of an organism over multiple generations, or something similar. Let us, for now, imagine modeling a semelparous organism, and imagine it starts at a specific point, and each generation it will release a certain number of larvae. Where will those larvae end up, and how many will make it?
+Often we will want to model the dispersal of an organism over multiple generations, or something similar. Let us, for now, imagine modeling a semelparous organism, and imagine it starts at a specific point, and each generation it will release a certain number of larvae into a habitat in which the larvae face no competion. Where will those larvae end up, and how many will make it?
+
+It is **important** to notice that the connectivity that this simple model describes is highly unlikely to be applicable to actual observed spread of larvae *which recruit succesfully.* In any more realistic ecosystem, competition with existing adults of all species, and competition with larvae of other species, will usually significantly alter the spatial patterns of realized connectivity. This is particularly true near the edge of species ranges (Lush & Pringle, in prep, 2023). The models below estimates of the number of larvae which enter the plankton in one place, are then transported by ocean currents could reach another place. The realized connectivity will also depend on the biological processes (e.g. competition, predation) which control the number of larvae which survive the trip and recruit.
 
 Before going further, let us load the connectivity data defined in 03_GetData_Subset_and_Combine.RMD:
 
@@ -21,7 +23,7 @@ The connectivity data described above extends to the greater of 100km from land 
   source('connectivityUtilities.R')
 ```
 
-Besides defining the functions we need to subset the habitat, it also defines three matrices that give the water depth on the model grid (`gridDepth`), the distance from land in kilometers (`gridDistKm`) and in model grid cells (`gridDist`). As an example of how to plot this data, here we sample the distance from land at the starting locations of the connectivity data E, and plot it:
+Besides defining the functions we need to subset the habitat, `connectivityUtilities.R` also defines three matrices that give the water depth on the model grid (`gridDepth`), the distance from land in kilometers (`gridDistKm`) and the distance from land in model grid cells (`gridDist`). As an example of how to plot this data, here we sample the distance from land at the starting locations of the connectivity data E, and plot it:
 
 ```{r showDepth}
     #get the water depth on the starting points
@@ -43,13 +45,13 @@ Besides defining the functions we need to subset the habitat, it also defines th
     print(p)
 ```
 
-In `connectivityUtilities.R`, a function \``is defined which takes one of the quantities defined on the model grid and uses it to subset the connectivity data. It is called with`subsetConnectivity_byGridValue\<-function(E,gridValues,minValue,maxValue,trimTo=FALSE)\` where
+In `connectivityUtilities.R`, a function `subsetConnectivity_byGridValue` is defined which takes one of the quantities defined on the model grid and uses it to subset the connectivity data. It is called with`subsetConnectivity_byGridValue(E,gridValues,minValue,maxValue,trimTo=FALSE)` where
 
--   E is the existing connectivity data
--   gridValues is a matrix like gridDepth, gridDist, or gridDistKm, defined on the model grid
--   minValue is the minimum value of gridValue that will allow a point to be included in the habitat
--   maxValue is the maximum value of gridValue that will allow a point to be included in the habitat
--   trimTo determines if we include particles which start inside the included habitat but settle outside in the new connectivity data, or if we exclude them. if trimTo=True, they are excluded.
+-   `E` is the existing connectivity data
+-   `gridValues` is a matrix like gridDepth, gridDist, or gridDistKm, defined on the model grid
+-   `minValue` is the minimum value of gridValue that will allow a point to be included in the habitat
+-   `maxValue` is the maximum value of gridValue that will allow a point to be included in the habitat
+-   `trimTo` determines if we include particles which start inside the included habitat but settle outside in the new connectivity data, or if we exclude them. if `trimTo=True`, they are excluded.
 
 In general, for computing connectivity over multiple generations, it is best to set `trimTo=TRUE`.
 
@@ -86,7 +88,7 @@ With a finite habitat, and dispersal that can go anywhere in an ocean, many drif
 
 ### Run one dispersal generation, and plot
 
-To calculate the dispersal and growth over one generation, the `propagateOneGeneration<-function(E,connectDict,orgDist,R)` function is used. `E` is the dispersal data, `connectDict` is a dictionary that need only be calculated once for a single connectivity data.frame `E` with `makeConnectionDict<-function(E)`, `orgDist` is the distribution of organisms (the `critters` above), and `R` is a number, the growth rate as defined above.
+To calculate the dispersal and growth over one generation, the `propagateOneGeneration(E,connectDict,orgDist,R)` function is used. `E` is the dispersal data, `connectDict` is a dictionary that need only be calculated once for a single connectivity data.frame `E` with `makeConnectionDict<-function(E)`, `orgDist` is the distribution of organisms (the `critters` above), and `R` is a number that gives the growth rate as defined above.
 
 ```{r goOneGen}
     R=1.0
@@ -110,9 +112,9 @@ It is interesting to determine if the total population has increased or decrease
 
 ```
 
-### Run multiple dispersal genrations, and plot
+### Run multiple dispersal generations, and plot
 
-It is interesting to know how the distribution of the initial innoculation changes over time. It is also useful to know how the population changes over time if `R` is 1. This is a measure of the fraction of larvae lost to offshore. The code below looks at this in the simple limit that `R`=1 for a single species that experiences no density-dependent effects and is not in competition with any other species in the habitat. The spatial distribution of available habitat is as defined above.
+It is interesting to know how the distribution of the initial inoculation changes over time. It is also useful to know how the population changes over time if `R` is 1. This is a measure of the fraction of larvae lost to offshore. The code below looks at this in the simple limit that `R`=1 for a single species that experiences no density-dependent effects and is not in competition with any other species in the habitat. The spatial distribution of available habitat is as defined above. It is **important** to remember the caveat from the top of this page -- the observed spread of the organism is likely much faster than would occur in a realistic ocean where larvae would compete for resources with other larvae. This is particularly relevant when a species is expanding its range upstream (e.g. in this case, North of Cape Hatteras).
 
 To animate the evolution of the distribution of the introduced critter, a data.frame `allGenerations` will be built from multiple generations of dispersal of the initial critter distribution. A column `generation` will be added. The gganimate package will then be used to animate this data.frame. Start by build `allGenerations`:
 
