@@ -1,4 +1,4 @@
-# WARNING-- THIS CODE IS ACTIVELY BEING DEVELOPED. PLEASE DON'T USE FOR ANYTHING IMPORTANT, OR COMPLAIN IF ANYTHING YOU DO WITH IT BREAKS. Please direct questions to James Pringle, University of New Hampshire, jpringle@unh.edu
+# WARNING-- THIS CODE IS ACTIVELY BEING DEVELOPED. Please direct questions to James Pringle, University of New Hampshire, jpringle@unh.edu
 
 
 # EZfate -- global (soon) estimates of connectivity in and near the coastal ocean. 
