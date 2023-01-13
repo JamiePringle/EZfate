@@ -248,6 +248,11 @@ subsetConnectivity_byPolygon<-function(Eplus,limitPoly,trimTo=FALSE){
   #locations which have nxFrom,nyFrom points. If trimTo=FALSE (the default), it
   #will include all To points.
   
+  #check if latitude and longitude exists 
+  if (!"lonFrom"%in% colnames(Eplus)) {
+    stop('Must call addLatLon() on connectivity data before calling this function')
+  }
+  
   #make an sf sfc object (see https://geocompr.robinlovelace.net/index.html) of all the *From points
   thePoints<-st_multipoint(matrix(cbind(Eplus$lonFrom,Eplus$latFrom),nrow(Eplus),2))
   thePoints=st_sfc(thePoints,crs=4326)
