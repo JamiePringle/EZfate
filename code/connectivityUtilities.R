@@ -52,7 +52,7 @@ if (TRUE) {
 # month: and integer which specifies the month of the data
 
 # We need to specify the root URL which contains the data
-rootDataURL<-'http://oxbow.sr.unh.edu/data/RcommunityConnectivityMatrices/'
+rootDataURL<-'https://oxbow.sr.unh.edu/data/RcommunityConnectivityMatrices/'
 
 # and specify the layout of the files below rootDataURL; this string will be
 # processed by sprintf, and as currently defined expects
