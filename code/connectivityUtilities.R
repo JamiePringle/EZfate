@@ -1,4 +1,3 @@
-
 library(ncdf4)
 library(tidyverse,quietly=TRUE,warn.conflicts=FALSE) #get it to shut up!
 library(sf,quietly=TRUE,warn.conflicts=FALSE)
@@ -8,10 +7,35 @@ library(collections,quietly=TRUE,warn.conflicts=FALSE)
 #it makes, among other things, the combination of connectivity data 
 #much faster.
 if (TRUE) {
+  #Does using furr and doParallel at once get me in trouble?
+  
+  #libraries only for parallel
+  library(iterators)
+  library(foreach)
+  library(furrr,quietly=TRUE,warn.conflicts=FALSE)  
+  library(doParallel)
+  
+  #for furr
   runParallel=TRUE
-  library(furrr,quietly=TRUE,warn.conflicts=FALSE)
   future::plan(multisession)
   nProcessors=parallel::detectCores()
+  
+  #for doParallel
+  #from https://cran.r-project.org/web/packages/doParallel/vignettes/gettingstartedParallel.pdf
+  #This function starts a cluster and returns, so that the cluster can be closed after using it
+  startCluster<-function() {
+    if (TRUE) {
+      #not sure if this is the best parallel setup, but works on windows as well
+      nProcessors=parallel::detectCores()
+      cl<-makeCluster(nProcessors)
+      registerDoParallel(cl)
+    } else {
+      nProcessors=parallel::detectCores()
+      cl<-makeCluster(nProcessors,type='FORK')
+      registerDoParallel(cl)
+    }
+    return(cl)
+  }
 }else{
   runParallel=FALSE
 }
@@ -220,24 +244,69 @@ trimToOnlyFromPlaces<-function(EplusTrimmed){
   #the starting points
   startPoints<-dict(EplusTrimmed$nxFrom,map2(EplusTrimmed$nxFrom,EplusTrimmed$nyFrom,c)) #items, keys!
   
+  # #for debugging, see how many to points there are
+  # sumPoints=0
+  # for (nr in 1:nrow(EplusTrimmed)) {
+  #   sumPoints<-sumPoints+length(EplusTrimmed$numTo[[nr]])
+  # }
+  # print(paste('Total number of to points before is ',sumPoints))
+  
+  
   #now, lets see if for this start point, which nxTo,nyTo are in the startPoints
   #then trim nxTo,nyTo and numTo to only include those points
-  for (np in 1:nrow(EplusTrimmed)){
-    #first find which *To's are also starting points
-    nxTo<-EplusTrimmed$nxTo[[np]]
-    nyTo<-EplusTrimmed$nyTo[[np]]
-    numTo<-EplusTrimmed$numTo[[np]]
-    allTo<-map2(nxTo,nyTo,c)
-    inStarts<-unlist(map(allTo,startPoints$has)) #map returns list of lists, unlist makes into a single list
-    
-    #print(np)
-    #now put trimmed records back into EplusTrimmed
-    EplusTrimmed$nxTo[[np]]<-nxTo[inStarts]
-    EplusTrimmed$nyTo[[np]]<-nyTo[inStarts]
-    EplusTrimmed$numTo[[np]]<-numTo[inStarts]
-    EplusTrimmed$lonTo[[np]]<-EplusTrimmed$lonTo[[np]][inStarts]
-    EplusTrimmed$latTo[[np]]<-EplusTrimmed$latTo[[np]][inStarts]
+  if (!runParallel) {
+    #SERIAL CODE
+    if (debugOutput) {tic('serial core')}
+    for (np in 1:nrow(EplusTrimmed)){
+      #first find which *To's are also starting points
+      nxTo<-EplusTrimmed$nxTo[[np]]
+      nyTo<-EplusTrimmed$nyTo[[np]]
+      numTo<-EplusTrimmed$numTo[[np]]
+      allTo<-map2(nxTo,nyTo,c)
+      inStarts<-unlist(map(allTo,startPoints$has)) #map returns list of lists, unlist makes into a single list
+      
+      #print(np)
+      #now put trimmed records back into EplusTrimmed
+      EplusTrimmed$nxTo[[np]]<-nxTo[inStarts]
+      EplusTrimmed$nyTo[[np]]<-nyTo[inStarts]
+      EplusTrimmed$numTo[[np]]<-numTo[inStarts]
+      EplusTrimmed$lonTo[[np]]<-EplusTrimmed$lonTo[[np]][inStarts]
+      EplusTrimmed$latTo[[np]]<-EplusTrimmed$latTo[[np]][inStarts]
+    }
+  } else {
+    #PARALLEL CODE
+    #if (debugOutput) {tic('parallel core of subsetConnectivity_by*() runs in')}
+    cl=startCluster() #start cluster 
+    whatGot<-foreach(Erow=iter(EplusTrimmed,by='row'),.combine=rbind.data.frame,.packages="purrr",
+                     .multicombine=TRUE) %dopar% {
+      #for details, see https://stackoverflow.com/questions/29828710/parallel-processing-in-r-for-a-data-frame
+      nxTo<-Erow$nxTo[[1]]
+      nyTo<-Erow$nyTo[[1]]
+      numTo<-Erow$numTo[[1]]
+      allTo<-map2(nxTo,nyTo,c)
+      inStarts<-unlist(map(allTo,startPoints$has)) #map returns list of lists, unlist makes into a single list
+      
+      #print(np)
+      #now put trimmed records back into Erow
+      Erow$nxTo[[1]]<-nxTo[inStarts]
+      Erow$nyTo[[1]]<-nyTo[inStarts]
+      Erow$numTo[[1]]<-numTo[inStarts]
+      Erow$lonTo[[1]]<-Erow$lonTo[[1]][inStarts]
+      Erow$latTo[[1]]<-Erow$latTo[[1]][inStarts]
+      Erow #this is the key line; this last line is what the foreach function returns for each iteration
+    }
+    EplusTrimmed<-whatGot
+    stopCluster(cl) #stop the cluster.
   }
+  #if (debugOutput) {toc()}
+  
+  #for debugging, see how many to points there are
+  # sumPoints=0
+  # for (nr in 1:nrow(EplusTrimmed)) {
+  #   sumPoints<-sumPoints+length(EplusTrimmed$numTo[[nr]])
+  # }
+  # print(paste('Total number of to points after is ',sumPoints))
+  
   return(EplusTrimmed)
 }
 
@@ -500,7 +569,6 @@ if (FALSE) {
 #if True, test addLatLon AND the code to combine multiple connectivity files
 #this code also reads in the data used by subsequent test blocks
 if (FALSE) {
-  
   #get data to process
   regionName<-'theAmericas'
   depth<-1 #what depth the larvae are released from
@@ -562,7 +630,9 @@ if (FALSE) {
   limitPoly<-st_sfc(limitPoly,crs=4326) #make into a surface, 4326 is WGS84
   
   #subset connectivity data
+  tic('ran subsetConnectivity_byPolygon in')
   EplusTrimmed<-subsetConnectivity_byPolygon(Eplus,limitPoly,trimTo=TRUE)
+  toc()
   
   #if true, try to plot limitPoly
   #this is a great resource
