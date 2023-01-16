@@ -16,15 +16,15 @@ To use EZfate to estimate particle dispersal from pre-computed particle tracks, 
 -   connectivityUtilities.R which processes the connectivity data and analyzes it.
 -   getConnectivityData.R which downloads the data.
 
-These files can be retrieved from <https://github.com/JamiePringle/EZfate> or downloaded along with this tutorial from **in future, link to release**.
+These files can be retrieved from <https://github.com/JamiePringle/EZfate/releases>.
 
 **Second**: you need to decide upon a directory to store all the connectivity data. In all of the examples below, this is a directory called "theTestData" that is kept in the same directory as the \*.R files.
 
 **Third**: You need the libraries given in the code block below.
 
-To test the installation of these packages, run the code block above, and make sure it works. Don't worry about the tidyverse conflicts.
+To test the installation of these packages, run the code block below, and make sure it works. Don't worry about the tidyverse conflicts.
 
-```{r libraryLoad}
+```{r libraryLoad, message=FALSE}
 library(ncdf4)
 library(tidyverse)
 library(sf)

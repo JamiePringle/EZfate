@@ -5,32 +5,32 @@ date: "`r Sys.Date()`"
 output: html_document
 ---
 
-**An important note**: In this section we read in the connectivity data, process it, and save it to a directory. To do so, the code must read the data in `model_depth_and_distance.nc` and save the data we download into predictable places. To do this, it is **important** that you run the code in a predictible way from a known location. In Rstudio, the easiest way to do this is to go to the "Session" menu, "Set Working Directory" item, and choose "To Source File Location." Your data files will then be saved into the directory this file is in, and the code will find the `model_depth_and_distance.nc` in the `connectivityData` directory within it. You can also explicitly call the setwd() function.
+**An important note**: In this section we read in the connectivity data, process it, and save it to a directory. To do so, the code must read the data in `model_depth_and_distance.nc` and save the data we download into predictable places. To do this, it is **important** that you run the code in a predictable way from a known location. In Rstudio, the easiest way to do this is to go to the "Session" menu, "Set Working Directory" item, and choose "To Source File Location." Your data files will then be saved into the directory this file is in, and the code will find the `model_depth_and_distance.nc` in the `connectivityData` directory within it. You can also explicitly call the setwd('/directory/with/data') function to specify where the data will be kept.
 
-The functions to retrieve the connectivity data is contained in the file `getUtilities.R`, so we must source that file to load the functions into R. If you look at this file, you will see where the data is stored on the web.
+The functions to retrieve the connectivity data is contained in the file `connectivityUtilities.R`, so we must source that file to load the functions into R. If you look at this file, you will see where the variable `rootDataURL` is defined. `rootDataURL` gives the location where the connectivity data is stored on a server.
 
-```{r sourceTheCode}
+```{r sourceTheCode, messages=FALSE}
 source('connectivityUtilities.R')
 ```
 
 Once this is done, you will see the function `getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD,dataDir='connecivityData')` defined. This function checks to see if the requested data has been downloaded and placed in `dataDir`. If it has, it reads it from `dataDir` and returns it. If it has not, it downloads it from the servers at the University of New Hampshire into `dataDir` and then loads it. *If the data is ever updated on the server* you must delete it from `dataDir` to get the new data.
 
-The function `getConnectivityData` takes the following arguements:
+The function `getConnectivityData` takes the following arguments:
 
 -   \`regionName\`\`: A string. To improve download speed, the connectivity data is broken into regions. The github page for EZfate specifies what regions exist.
--   `depth`: An integer. The depth the particles start at. Since the particle tracks have already been created, you can only choose ones that exist on the server. These are given on the EZfate github page.\
+-   `depth`: An integer. The depth the particles start at. You can only choose ones that exist on the server. These depths are given on the EZfate github page.
 -   `year`: This is either an integer for the year (For example, 2007), or the string "climatology" if you prefer the particle tracks for all years that have been run. Again, see the github page for the details.
 -   `verticalBehavior`: A string that can be "fixed" for particles that stay at their starting depth, or "starts" for those that can be advected vertically. Other vertical behaviors may be added in the future. See the github page for what has been done.
 -   `month`: The month the particles have been released over.
--   `minPLD`: The time the particles drift with the currents.
+-   `minPLD`: The time in days the particles drift with the currents. Again, since the data is pre-computed, you can only use certain PLD's. Currently, you can choose 2,4,6,...60 days.
 -   `maxPLD`: The time the particles drift with the currents. For now, should be the same as `minPLD`.
 -   `dataDir`: A string that defaults to 'connectivityData\`. The directory to save the data in. If you do not give it an absolute path (e.g.'/home/name/..' or 'C:\some\path\name'), it will be saved in the same directory as this file. If you are ok with the default, you may choose to not provide this argument.
 
-So lets get the climatological data for particles released around North and South America in May at 1m, and forced to stay at that depth for the 18 day duration of their drifting. The data is stored in the sub-directory to this directory "theTestData".
+So lets get the climatological data for particles released around North and South America in May at 1m, and forced to stay at that depth for the 18 day duration of their drifting. The data is stored in the sub-directory "theTestData".
 
 You **must** create the directory "theTestData" in the same directory as this file, and use the Rstudio option in the "Session" menu to "Set Working Directory..." to "To Source File Location".
 
-The first time you run this, it will download the data. After that it will just read it from the local copy.
+The first time you run the code block below, it will download the data. After that it will just read it from the local copy.
 
 ```{r getData}
   regionName<-'theAmericas'
@@ -52,7 +52,7 @@ You will notice the data.frame `E1` in the workspace, with a large number of obs
 
 # Get the June data
 
-This is the same as getting the may data, but we change the `month` variable to 6. The rest need not be defined since they were defined above. The June data is stored in the data.frame `E2`.
+This is the same as getting the May data, but we change the `month` variable to 6. The rest need not be defined since they were defined above. The June data is stored in the data.frame `E2`.
 
 ```{r getMoreData}
 month<-6
@@ -85,7 +85,7 @@ We will discuss how the connectivity data in E1 and E2 is organized and how to p
 
 # Subset data with a polygon, then plot the polygon and the starting points
 
-The full american dataset has 164,701 starting points, and manipulating all of them can be slow and awkward. So the connectivityUtilities.R file has routines to take subsets of the connectivity data in many ways. Here the data is trimmed to only include points within a polygon that contains the East Coast of North America from Miami to the Gulf of Maine. We start by defining two vectors, `lonPoly` and `latPoly`, that contain the points that define the polygon -- these were obtained from Google maps. These are then mapped to a polygon using the WGS84 datum using the st\_ functions. **Note that the first and last points of the polygon must be the same, to close the polygon.**
+The full american dataset has 164,701 starting points, and manipulating all of them can be slow and awkward. So the connectivityUtilities.R file has routines to take subsets of the connectivity data in many ways. Here the data is trimmed to only include points within a polygon that contains the East Coast of North America from Miami to the Gulf of Maine. We start by defining two vectors, `lonPoly` and `latPoly`, that contain the points that define the polygon -- these were obtained from Google maps. These are then mapped to a polygon with the WGS84 datum using the st\_ functions. **Note that the first and last points of the polygon must be the same, to close the polygon.**
 
 ```{r makePoly}
   latPoly<-c(25.0,38.2,46.47,45.21,44.21,27.95,25.12,25.0)

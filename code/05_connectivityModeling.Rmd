@@ -7,7 +7,7 @@ output: html_document
 
 Often we will want to model the dispersal of an organism over multiple generations, or something similar. Let us, for now, imagine modeling a semelparous organism, and imagine it starts at a specific point, and each generation it will release a certain number of larvae into a habitat in which the larvae face no competion. Where will those larvae end up, and how many will make it?
 
-It is **important** to notice that the connectivity that this simple model describes is highly unlikely to be applicable to actual observed spread of larvae *which recruit succesfully.* In any more realistic ecosystem, competition with existing adults of all species, and competition with larvae of other species, will usually significantly alter the spatial patterns of realized connectivity. This is particularly true near the edge of species ranges (Lush & Pringle, in prep, 2023). The models below estimates of the number of larvae which enter the plankton in one place, are then transported by ocean currents could reach another place. The realized connectivity will also depend on the biological processes (e.g. competition, predation) which control the number of larvae which survive the trip and recruit.
+It is **important** to notice that the connectivity that this simple model describes is highly unlikely to be applicable to actual observed spread of larvae *which recruit successfully.* In any more realistic ecosystem, competition with existing adults of all species, and competition with larvae of other species, will usually significantly alter the spatial patterns of realized connectivity. This is particularly true near the edge of species ranges (Lush & Pringle, in prep, 2023). The models below estimates of the number of larvae which enter the plankton in one place, are then transported by ocean currents could reach another place. The realized connectivity will also depend on the biological processes (e.g. competition, predation) which control the number of larvae which survive the trip and recruit.
 
 Before going further, let us load the connectivity data defined in 03_GetData_Subset_and_Combine.RMD:
 
@@ -82,9 +82,9 @@ The latitude and longitude of these points can be added with the function `addLa
 
 This gives us the starting distribution of organisms. There is **no** reason that the initial distribution is a single organism. It could be many more.
 
-### Define growth
+### Defining "growth" R
 
-With a finite habitat, and dispersal that can go anywhere in an ocean, many drifting larvae will end up outside of the habitat and lost. However, a single individual can release more than one larva. In the code below, we will define a growth rate R. It is important to understand what this R is, for it may differ from the usage of R in other context. It is the number of propagules that each individual releases that would be expected to survive until the settlement time -- e.g. net of mortality in the plankton. **However**, many of these surviving propagules may be outside of the habitat, and thus not survive into the next generation. *In subsequent parts of this document, the actual population growth rate will be calculated*. It is important to note that in most cases, if `R` is 1.0, the total number of critters `sum(critters$num)` will decrease after dispersal, because some propagules will have ended up outside of the habitat.
+With a finite habitat, and dispersal that can go anywhere in an ocean, many drifting larvae will end up outside of the habitat and lost. However, a single individual can release more than one larva. In the code below, we will define a growth rate R. It is important to understand what this R is, for it may differ from the usage of R in other contexts. It is the number of propagules that each individual releases that would be expected to survive until the settlement time -- e.g. net of mortality in the plankton. **However**, many of these surviving propagules may be outside of the habitat, and thus not survive into the next generation. *In subsequent parts of this document, the actual population growth rate will be calculated*. It is important to note that in most cases, if `R` is 1.0, the total number of critters `sum(critters$num)` will decrease after dispersal, because some propagules will have ended up outside of the habitat.
 
 ### Run one dispersal generation, and plot
 
@@ -148,7 +148,7 @@ The results of this dispersal can be animated with the `gganimate` package
     anim_save('rangeExpand.gif',p)
 ```
 
-If you are running this interactivly, and can't find your plot in the plot window, either load the file `rangeExpand.gif` into your browser, or type `print(p)`... Also look at any error messages that are generated -- you may need to install the `gifski` package.
+If you are running this interactively, and can't find your plot in the plot window, either load the file `rangeExpand.gif` into your browser, or type `print(p)`... Also look at any error messages that are generated -- you may need to install the `gifski` package.
 
 ![](rangeExpand.gif)
 

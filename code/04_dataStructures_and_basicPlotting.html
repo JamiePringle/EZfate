@@ -11,7 +11,7 @@
 
 <meta name="author" content="James Pringle" />
 
-<meta name="date" content="2022-12-14" />
+<meta name="date" content="2023-01-16" />
 
 <title>The structure of the conectivity data, and how to plot basic connectivity</title>
 
@@ -353,7 +353,7 @@ display: none;
 <h1 class="title toc-ignore">The structure of the conectivity data, and
 how to plot basic connectivity</h1>
 <h4 class="author">James Pringle</h4>
-<h4 class="date">2022-12-14</h4>
+<h4 class="date">2023-01-16</h4>
 
 </div>
 
@@ -362,13 +362,13 @@ how to plot basic connectivity</h1>
 <code>03_GetData_Subset_and_Combine.Rmd</code> and examine how
 connectivity is represented in the data.frame.</p>
 <pre class="r"><code>E&lt;-readRDS(&#39;mayJuneEastCoast_connectivity.RDS&#39;)</code></pre>
-<p>You should find a data.frame of many observations and 10 variables.
-Each row is contains four columns which contain a single number:
-<code>nxFrom</code> and <code>nyFrom</code> which define the grid
-location of a single particle release location, and <code>lonFrom</code>
-and <code>latFrom</code>, which give the longitude and latitude of that
-release location. The next five columns contain lists of numbers which
-define where particles that were released at
+<p>You should find a data.frame <code>E</code> of many observations and
+10 variables. Each row is contains four columns which contain a single
+number: <code>nxFrom</code> and <code>nyFrom</code> which define the
+grid location of a single particle release location, and
+<code>lonFrom</code> and <code>latFrom</code>, which give the longitude
+and latitude of that release location. The next five columns contain
+lists of numbers which define where particles that were released at
 <code>(nxFrom,nyFrom)</code> and <code>(lonFrom,latFrom)</code> ended
 up. <code>(nxTo,nyTo)</code> are the grid cells the particles get to,
 and <code>(lonTo,latTo)</code> are the latitudes they get to. Now, many
@@ -434,7 +434,17 @@ that leave the starting locations. Because
 ## ✔ purrr   0.3.4     
 ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 ## ✖ dplyr::filter() masks stats::filter()
-## ✖ dplyr::lag()    masks stats::lag()</code></pre>
+## ✖ dplyr::lag()    masks stats::lag()
+## 
+## Attaching package: &#39;foreach&#39;
+## 
+## 
+## The following objects are masked from &#39;package:purrr&#39;:
+## 
+##     accumulate, when
+## 
+## 
+## Loading required package: parallel</code></pre>
 <pre><code>## [1] &quot;file connectivityData/EZfateFiles/model_depth_and_distance.nc exists, no download&quot;</code></pre>
 <pre class="r"><code>  EstartPoints&lt;-subsetConnectivity_byPolygon(E,limitPoly,trimTo=FALSE)</code></pre>
 <p>Now combine each row in <code>EstartPoints</code> and make a
