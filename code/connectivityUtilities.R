@@ -225,6 +225,8 @@ addLatLon<-function(E){
   # E$latTo<-apply(E,1,nxny2lat)
   # print('done with applies')
 
+  #print('hello')
+  
   # this is not memory efficient, but is it fast?
   nxToList<-apply(E,1,function(a) {return(a$nxTo)})
   nyToList<-apply(E,1,function(a) {return(a$nyTo)})
@@ -546,21 +548,21 @@ addLatLon2orgDist<-function(orgDist){
 
 #if True, test addLatLon
 #this code also reads in the data used by subsequent test blocks
-if (FALSE) {
+if (TRUE) {
   
   #get data to process
   regionName<-'theAmericas'
-  depth<-1 #what depth the larvae are released from
+  depth<-10 #what depth the larvae are released from
   year<-'climatology' #the year you want to get, or "climatology" if you want all years
   verticalBehavior<-'fixed' #"fixed" if they stay at release depth, "starts" if they can advect vertically
-  month<-5 #what month to get
-  minPLD<-28; maxPLD<-minPLD #how many days they can drift. See text above for possible values
+  month<-4 #what month to get
+  minPLD<-16; maxPLD<-minPLD #how many days they can drift. See text above for possible values
   
   #now get the data
   E<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
   
   Eplus<-addLatLon(E)
-  if (FALSE) {
+  if (TRUE) {
     #plot output
     plot(Eplus$lonFrom,Eplus$latFrom)
   }
