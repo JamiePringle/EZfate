@@ -1,9 +1,9 @@
-# Please direct questions to James Pringle, University of New Hampshire, jpringle@unh.edu
+# Please direct questions to James Pringle, University of New Hampshire, jpringle@unh.edu. This is beta software for now, so anticipate evolution of the code and product. A first official release is planned for early summer 2023.
 
 
 # EZfate -- global (soon) estimates of connectivity in and near the coastal ocean. 
 
-## Software for analysis of precomputed Lagrangian Pathways from Mercator 1/12th degree ocean model
+## Software in R for obtaining and analyzing precomputed Lagrangian Pathways computed with currents from the Mercator 1/12th degree ocean model
 
 This repository contains code for analyzing precomputed Lagrangian pathways in the coastal ocean from the System For Global Ocean Physical Analysis At 1/12° as described [in this data sheet](https://www.mercator-ocean.eu/wp-content/uploads/2017/02/SYSTEM-sheet-_PSY4V3R1_2017.pdf). The particle tracking was made with oceanParcels, a python package described in at [oceanparcels.org](https://oceanparcels.org/).
 
