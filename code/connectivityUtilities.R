@@ -548,7 +548,7 @@ addLatLon2orgDist<-function(orgDist){
 
 #if True, test addLatLon
 #this code also reads in the data used by subsequent test blocks
-if (TRUE) {
+if (FALSE) {
   
   #get data to process
   regionName<-'theAmericas'
