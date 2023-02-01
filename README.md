@@ -13,7 +13,7 @@ Currently, the data and software will produce estimates of connectivity for indv
 
 Pathways have been calculated for the years 2007-2020, but will extended to include through 2022 by the end of the first quarter of 2023.  
 
-The current available data include the coastal oceans of North and South America for all 1/12° separated points from the coast to either depths up to 500m deep or 100km from the coast, whichever is greater. Future data releases will be global (Summer 2022). 
+The current available data include the coastal oceans of North and South America for all 1/12° separated points from the coast to either depths up to 500m deep or 100km from the coast, whichever is greater. Future data releases will be global (Summer 2023). 
 
 This work is supported by NSF project OCE 1947954.  
 
