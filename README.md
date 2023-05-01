@@ -1,4 +1,4 @@
-# EZfate -- global (soon) estimates of connectivity in and near the coastal ocean. 
+# EZfate -- global estimates of connectivity in and near the coastal ocean. 
 
 ## Software in R for obtaining and analyzing precomputed Lagrangian Pathways computed with currents from the Mercator 1/12th degree ocean model
 
