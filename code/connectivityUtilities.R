@@ -75,15 +75,19 @@ if (TRUE) {
 # 
 # month: and integer which specifies the month of the data
 
-# We need to specify the root URL which contains the data
-rootDataURL<-'https://oxbow.sr.unh.edu/data/RcommunityConnectivityMatrices/'
+# We need to specify the root URL which contains the data. As configured now
+# it downloads the global data. If you wish the data for just North and South
+# america, uncomment the second line below, with a different rootDataURL
+rootDataURL<-'https://oxbow.sr.unh.edu/data/EZfateData/RcommunityConnectivityMatrices/' #global data
+# rootDataURL<-'https://oxbow.sr.unh.edu/data/RcommunityConnectivityMatrices/' #just North and South America
 
 # and specify the layout of the files below rootDataURL; this string will be
 # processed by sprintf, and as currently defined expects
 # (depth,verticalBehavior, a string that is either year_2007 (or appropriate
 # year) or "climatological", month, minPLD, maxPLD). Use file.path so that the
 # path is appropriately made on all architectures.  
-dataLayout<-file.path('%s','allPoints','%dm','%s','%s_month%2.2d_minPLD%2.2d_maxPLD%2.2d.RDS')
+#dataLayout<-file.path('%s','allPoints','%dm','%s','%s_month%2.2d_minPLD%2.2d_maxPLD%2.2d.RDS') #for original test data
+dataLayout<-file.path('%s','%dm','%s','%s_month%2.2d_minPLD%2.2d_maxPLD%2.2d.RDS') #for global data
 
 getConnectivityData<-function(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD,dataDir='connectivityData'){
   #this code downloads into dataDir the connectivity data specified by the arguements

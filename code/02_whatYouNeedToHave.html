@@ -11,7 +11,7 @@
 
 <meta name="author" content="James Pringle" />
 
-<meta name="date" content="2023-01-16" />
+<meta name="date" content="2023-05-01" />
 
 <title>What must you have to use EZfate?</title>
 
@@ -352,29 +352,26 @@ display: none;
 
 <h1 class="title toc-ignore">What must you have to use EZfate?</h1>
 <h4 class="author">James Pringle</h4>
-<h4 class="date">2023-01-16</h4>
+<h4 class="date">2023-05-01</h4>
 
 </div>
 
 
 <p>To use EZfate to estimate particle dispersal from pre-computed
 particle tracks, you need to set up three things.</p>
-<p><strong>First</strong>, you must have these files:</p>
+<p><strong>First</strong>, you must get this file:</p>
 <ul>
 <li>connectivityUtilities.R which processes the connectivity data and
 analyzes it.</li>
-<li>getConnectivityData.R which downloads the data.</li>
 </ul>
-<p>These files can be retrieved from <a href="https://github.com/JamiePringle/EZfate" class="uri">https://github.com/JamiePringle/EZfate</a> or downloaded
-along with this tutorial from <strong>in future, link to
-release</strong>.</p>
+<p>This file can be retrieved from <a href="https://github.com/JamiePringle/EZfate/releases" class="uri">https://github.com/JamiePringle/EZfate/releases</a>.</p>
 <p><strong>Second</strong>: you need to decide upon a directory to store
 all the connectivity data. In all of the examples below, this is a
-directory called “theTestData” that is kept in the same directory as the
-*.R files.</p>
+directory called “connectivityData” that is kept in the same directory
+as the *.R files.</p>
 <p><strong>Third</strong>: You need the libraries given in the code
 block below.</p>
-<p>To test the installation of these packages, run the code block above,
+<p>To test the installation of these packages, run the code block below,
 and make sure it works. Don’t worry about the tidyverse conflicts.</p>
 <pre class="r"><code>library(ncdf4)
 library(tidyverse)

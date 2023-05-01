@@ -7,7 +7,7 @@ output: html_document
 
 **An important note**: In this section we read in the connectivity data, process it, and save it to a directory. To do so, the code must read the data in `model_depth_and_distance.nc` and save the data we download into predictable places. To do this, it is **important** that you run the code in a predictable way from a known location. In Rstudio, the easiest way to do this is to go to the "Session" menu, "Set Working Directory" item, and choose "To Source File Location." Your data files will then be saved into the directory this file is in, and the code will find the `model_depth_and_distance.nc` in the `connectivityData` directory within it. You can also explicitly call the setwd('/directory/with/data') function to specify where the data will be kept.
 
-The functions to retrieve the connectivity data is contained in the file `connectivityUtilities.R`, so we must source that file to load the functions into R. If you look at this file, you will see where the variable `rootDataURL` is defined. `rootDataURL` gives the location where the connectivity data is stored on a server.
+The functions to retrieve the connectivity data is contained in the file `connectivityUtilities.R`, so we must source that file to load the functions into R. If you look at this file, you will see where the variable `rootDataURL` is defined. `rootDataURL` gives the location where the connectivity data is stored on a server. It is here that you can change from downloading the 2007-2022 global data or the 2007-2020 North and South America data. The later data was the initial test data, and was the first to be run for all depths and vertical behaviors.
 
 ```{r sourceTheCode, messages=FALSE}
 source('connectivityUtilities.R')
@@ -17,8 +17,8 @@ Once this is done, you will see the function `getConnectivityData(regionName,dep
 
 The function `getConnectivityData` takes the following arguments:
 
--   \`regionName\`\`: A string. To improve download speed, the connectivity data is broken into regions. The github page for EZfate specifies what regions exist.
--   `depth`: An integer. The depth the particles start at. You can only choose ones that exist on the server. These depths are given on the EZfate github page.
+-   \`regionName\`\`: A string. To improve download speed, the connectivity data is broken into regions. The github page for EZfate shows a map of the boundaries of the following regions: "theAmericas", "Antarctica", "AsiaPacific", and "EuropeAfricaMiddleEast".
+-   `depth`: An integer. The depth the particles start at. You can only choose ones that exist on the server. These depths are given on the EZfate github page, and are currently 1, 10, 20 and 40 meters.
 -   `year`: This is either an integer for the year (For example, 2007), or the string "climatology" if you prefer the particle tracks for all years that have been run. Again, see the github page for the details.
 -   `verticalBehavior`: A string that can be "fixed" for particles that stay at their starting depth, or "starts" for those that can be advected vertically. Other vertical behaviors may be added in the future. See the github page for what has been done.
 -   `month`: The month the particles have been released over.
@@ -26,9 +26,9 @@ The function `getConnectivityData` takes the following arguments:
 -   `maxPLD`: The time the particles drift with the currents. For now, should be the same as `minPLD`.
 -   `dataDir`: A string that defaults to 'connectivityData\`. The directory to save the data in. If you do not give it an absolute path (e.g.'/home/name/..' or 'C:\some\path\name'), it will be saved in the same directory as this file. If you are ok with the default, you may choose to not provide this argument.
 
-So lets get the climatological data for particles released around North and South America in May at 1m, and forced to stay at that depth for the 18 day duration of their drifting. The data is stored in the sub-directory "theTestData".
+So lets get the climatological data for particles released around North and South America in May at 1m, and forced to stay at that depth for the 18 day duration of their drifting.
 
-You **must** create the directory "theTestData" in the same directory as this file, and use the Rstudio option in the "Session" menu to "Set Working Directory..." to "To Source File Location".
+You **must** create the directory "connectivityData" in the same directory as this file, and use the Rstudio option in the "Session" menu to "Set Working Directory..." to "To Source File Location".
 
 The first time you run the code block below, it will download the data. After that it will just read it from the local copy.
 
@@ -36,7 +36,7 @@ The first time you run the code block below, it will download the data. After th
   regionName<-'theAmericas'
   depth<-1
   year<-'climatology'
-  verticalBehavior<-'fixed'
+  verticalBehavior<-'starts'
   month<-5
   minPLD<-18; maxPLD<-minPLD
   E1<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)

@@ -11,14 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 To use EZfate to estimate particle dispersal from pre-computed particle tracks, you need to set up three things.
 
-**First**, you must have these files:
+**First**, you must get this file:
 
 -   connectivityUtilities.R which processes the connectivity data and analyzes it.
--   getConnectivityData.R which downloads the data.
 
-These files can be retrieved from <https://github.com/JamiePringle/EZfate/releases>.
+This file can be retrieved from <https://github.com/JamiePringle/EZfate/releases>.
 
-**Second**: you need to decide upon a directory to store all the connectivity data. In all of the examples below, this is a directory called "theTestData" that is kept in the same directory as the \*.R files.
+**Second**: you need to decide upon a directory to store all the connectivity data. In all of the examples below, this is a directory called "connectivityData" that is kept in the same directory as the \*.R files.
 
 **Third**: You need the libraries given in the code block below.
 

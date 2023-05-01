@@ -1,0 +1,84 @@
+---
+title: "Plot Ocean Regions"
+author: "James Pringle"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+This code illustrates how we can make a map of the different regions, so you can discover which ones you need to get for your project. It assumes you have read the tutorial at least through the fourth section, on data structures and basic plotting.
+
+**An important note**: In this section we read in the connectivity data, process it, and save it to a directory. As before, it is **important** that you run the code in a predictable way from a known location. In Rstudio, the easiest way to do this is to go to the "Session" menu, "Set Working Directory" item, and choose "To Source File Location." Your data files will then be saved into the directory this file is in, and the code will find the `model_depth_and_distance.nc` in the `connectivityData` directory within it. You can also explicitly call the setwd('/directory/with/data') function to specify where the data will be kept.
+
+The functions to retrieve the connectivity data is contained in the file `connectivityUtilities.R`, so we must source that file to load the functions into R. More details on this process can be found at [**03_getData_Subset_and_Combine**](03_GetData_Subset_and_Combine.html).
+
+```{r sourceTheCode, messages=FALSE}
+source('connectivityUtilities.R')
+```
+
+As described in [**03_getData_Subset_and_Combine**](03_GetData_Subset_and_Combine.html), we can use the `getConnectivityData` package to get a connectivity matrix for a particular region and PLD. Here we choose a specific year. This choice of year does not matter, since we are only interested in the starting locations. We save the matrix into the variable **E**.
+
+```{r getData}
+  regionName<-'theAmericas'
+  depth<-1
+  year<-2007
+  verticalBehavior<-'starts'
+  month<-5
+  minPLD<-18; maxPLD<-minPLD
+  E<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
+```
+
+To save disk space, and to reduce the amount of data to be transfered across the network, the latitude and longitude data is not included in the connectivity data -- instead, the data is all stored as indices to the circulation model grid. However, for manipulating the connectivity and plotting it, it is necessary to have the latitude and longitude data. So we must add it, using the `addLatLon()` function in the `connectivityUtilities.R` file.
+
+```{r addLatLon}
+  E<-addLatLon(E)
+```
+
+Now we can plot the starting locations (lonFrom and latFrom) in the matrix. First, we load the plotting libraries and initialize them.
+
+```{r intitializePlotting}
+    library("rnaturalearth")
+    library("rnaturalearthdata")
+    world <- ne_countries(scale = "medium", returnclass = "sf") #get coastline data
+    class(world)
+```
+
+and then we plot the resulting data:
+
+```{r makeMap}
+    p<-ggplot(data = world) + geom_sf() +
+      coord_sf(xlim= c(-180, 180), ylim = c(-85, 85), expand = FALSE)+
+      geom_point(data = E, aes(x = lonFrom, y = latFrom), size = 1, shape = 23, fill = "green",color='green')
+    print(p) #this makes the figure appear
+
+```
+
+Ok, now lets put this into a loop so we can plot all the regions at once. This code gathers the data and adds it to a single data.frame().
+
+```{r mapAllRegions}
+
+#now loop over regions, get the data, add latitude and longitude, and then plot the points
+    regionList<-list('theAmericas','EuropeAfricaMiddleEast','AsiaPacific','Antarctica')
+    nColor<-0
+    Eall=data.frame()
+    for (regionName in regionList) {
+      nColor<-nColor+1
+      print(paste('working on',regionName))
+      E<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD) #the rest of the parameters are defined in the first code block. 
+      E<-addLatLon(E) 
+      E<-E[c('lonFrom','latFrom')] #save lots of memory by throwing away what we don't need
+      E['region']<-regionName
+      Eall=rbind(Eall,E)
+    }
+```
+
+and now make the plot appear:
+
+```{r, fig.width=8}
+#first, make the map
+    p<-ggplot(data = world) + geom_sf() +
+      coord_sf(xlim= c(-180, 180), ylim = c(-85, 85), expand = FALSE)
+
+#and now make the plot appear
+  p<-p+geom_point(data = Eall, aes(x = lonFrom, y = latFrom,color=region), size = 1, shape = 23)
+  print(p)
+```
