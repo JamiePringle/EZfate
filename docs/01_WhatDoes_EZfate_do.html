@@ -11,7 +11,7 @@
 
 <meta name="author" content="James Pringle" />
 
-<meta name="date" content="2022-12-16" />
+<meta name="date" content="2023-05-04" />
 
 <title>What does the EZfate package do?</title>
 
@@ -352,7 +352,7 @@ display: none;
 
 <h1 class="title toc-ignore">What does the EZfate package do?</h1>
 <h4 class="author">James Pringle</h4>
-<h4 class="date">2022-12-16</h4>
+<h4 class="date">2023-05-04</h4>
 
 </div>
 
@@ -371,15 +371,17 @@ distance of the coast and ended up at Portsmouth NH started?</li>
 <li>Do you want to know if larvae were released at Portsmouth NH, and
 allowed to settle in coastal habitat for 5 generations, where would they
 end up? Where would their density be greatest?</li>
-<li><strong>IMPORTANT</strong>: Right now this is in development, and
-the interface may change. Also, at least at first, a limited number of
-release depths, vertical behaviors, and, perhaps most importantly,
-regions will be included. Right now, data is only available for North
-and South America, as will be shown below. When the code is ready to
-released, the rest of the globe will be simulated.</li>
+<li><strong>IMPORTANT</strong>: At least at first, a limited number of
+release depths, and vertical behaviors will be included. Currently,
+initial depths of 1, 10, 20 and 40 meters and advection by only
+horizontal or by horizontal and vertical currents is available for North
+and South America. Globally, all these depths and vertical behaviors
+will be added during 2023. The current status of available starting
+depths and behaviors can be found at <a href="https://github.com/JamiePringle/EZfate" class="uri">https://github.com/JamiePringle/EZfate</a>.</li>
 </ul>
-<p>All this can be done with pre-computed particle tracks from the
-Mercator 1/12th of degree global ocean model, as described in <a href="https://www.mercator-ocean.eu/wp-content/uploads/2017/02/SYSTEM-sheet-_PSY4V3R1_2017.pdf">in
+<p>All this can be done in R with pre-computed particle tracks
+calculated from currents from the Mercator 1/12th of degree global ocean
+model described in <a href="https://www.mercator-ocean.eu/wp-content/uploads/2017/02/SYSTEM-sheet-_PSY4V3R1_2017.pdf">in
 this data sheet</a>. The particle tracking was made with oceanParcels, a
 python package described in at <a href="https://oceanparcels.org/">oceanparcels.org</a>. For details of
 dates included, depths released and depth behaviors simulated, see the
@@ -389,7 +391,7 @@ adapt this resource to your needs, the following R notebooks are
 provided. If you want to get a quick glimpse of the capabilities of this
 code, you can skip ahead to notebook 04 and the following notebooks. But
 if you want to use this code, please go through them carefully and in
-order through at least notebook 6.</p>
+order through at least notebook 4.</p>
 <ul>
 <li><a href="02_whatYouNeedToHave.html"><strong>02_whatYouNeedToHave</strong></a>:
 Describes what needs to be configured in R before using this code.</li>
@@ -417,6 +419,11 @@ not yet been finished</em></li>
 look at the right-hand side toolbar for the “Releases” tab and click on
 the green “latest” button, or go <a href="https://github.com/JamiePringle/EZfate/releases/">to this
 page.</a></p>
+<p>There are some other R notebooks you might find helpful.</p>
+<ul>
+<li><a href="Plot_OceanRegions.html"><strong>Plot_OceanRegions</strong></a>
+makes the plot of ocean regions and their names.</li>
+</ul>
 <p><strong>In the next section, you will learn what R packages must be
 installed to use EZfate.</strong></p>
 </div>

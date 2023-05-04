@@ -11,7 +11,7 @@
 
 <meta name="author" content="James Pringle" />
 
-<meta name="date" content="2023-05-01" />
+<meta name="date" content="2023-05-04" />
 
 <title>What must you have to use EZfate?</title>
 
@@ -352,7 +352,7 @@ display: none;
 
 <h1 class="title toc-ignore">What must you have to use EZfate?</h1>
 <h4 class="author">James Pringle</h4>
-<h4 class="date">2023-05-01</h4>
+<h4 class="date">2023-05-04</h4>
 
 </div>
 
@@ -364,11 +364,13 @@ particle tracks, you need to set up three things.</p>
 <li>connectivityUtilities.R which processes the connectivity data and
 analyzes it.</li>
 </ul>
-<p>This file can be retrieved from <a href="https://github.com/JamiePringle/EZfate/releases" class="uri">https://github.com/JamiePringle/EZfate/releases</a>.</p>
+<p>This file can be retrieved from <a href="https://github.com/JamiePringle/EZfate/releases" class="uri">https://github.com/JamiePringle/EZfate/releases</a>. This
+package also includes the R notebook pages that you are viewing now.
+They are all in the <strong>code</strong> directory.</p>
 <p><strong>Second</strong>: you need to decide upon a directory to store
 all the connectivity data. In all of the examples below, this is a
 directory called “connectivityData” that is kept in the same directory
-as the *.R files.</p>
+as the *.R and *.RMD files.</p>
 <p><strong>Third</strong>: You need the libraries given in the code
 block below.</p>
 <p>To test the installation of these packages, run the code block below,
@@ -390,8 +392,9 @@ especially on linux, they will suggest installing additional system
 libraries. Second, if you are using “conda” to manage python
 installations, make sure that you have no conda environments enabled.
 Having a conda environment installed when running R can lead to issues
-when installing these libraries associated the operating system, R and
-python having different versions of libraries such as gdal and proj.</p>
+when installing these libraries. The errors arise from the operating
+system, R and python having different versions of libraries such as gdal
+and proj.</p>
 <p><strong>In the next section, you will learn how to get the
 connectivity data and subset it to your region of interest, and combine
 multiple connectivity data sets.</strong></p>

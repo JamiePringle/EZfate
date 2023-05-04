@@ -1,0 +1,26 @@
+---
+title: "Check numTo"
+author: "James Pringle"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+This code is meant to understand and double check the numTo variable in both single years and months data, and in climatology
+
+```{r sourceTheCode, messages=FALSE}
+source('connectivityUtilities.R')
+```
+
+Now get some data in
+
+```{r getData}
+  regionName<-'theAmericas'
+  depth<-1
+  year<-2007
+  verticalBehavior<-'starts'
+  month<-5
+  minPLD<-18; maxPLD<-minPLD
+  E1<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
+```
+
+Now lets examine

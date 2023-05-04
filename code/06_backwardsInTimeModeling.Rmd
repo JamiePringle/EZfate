@@ -1,0 +1,43 @@
+---
+title: "Backwards in time modeling"
+author: "James Pringle"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+This code illustrates how to determine which Lagrangian pathways lead [**to**]{.underline} a point instead of away from it. This is useful for backwards in time modeling of connectivity, understanding the evolution of lineages in genetic models, etc.
+
+**An important note**: In this section we read in the connectivity data, process it, and save it to a directory. As before, it is **important** that you run the code in a predictable way from a known location. In Rstudio, the easiest way to do this is to go to the "Session" menu, "Set Working Directory" item, and choose "To Source File Location." Your data files will then be saved into the directory this file is in, and the code will find the `model_depth_and_distance.nc` in the `connectivityData` directory within it. You can also explicitly call the setwd('/directory/with/data') function to specify where the data will be kept.
+
+The functions in `connectivityUtilities.R` are still needed, so lets load that.
+
+```{r sourceTheCode, messages=FALSE}
+source('connectivityUtilities.R')
+```
+
+As described in [**03_getData_Subset_and_Combine**](03_GetData_Subset_and_Combine.html), we can use the `getConnectivityData` package to get a connectivity matrix for a particular region and PLD. Here we choose a specific year, but we could have as well chosen a climatology. We save the matrix into the variable **E**.
+
+```{r getData}
+  regionName<-'theAmericas'
+  depth<-1
+  year<-2007
+  verticalBehavior<-'starts'
+  month<-5
+  minPLD<-18; maxPLD<-minPLD
+  E<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
+```
+
+To understand the backwards in time modeling, we need to "transpose" the connectivity into the matrix Etrans. In this transposed matrix, `nxTo` and `nyTo` are the model grid cells where the Lagrangian paths end, and in the data.frame() are a list of integers, as are `nxFrom` and `nyFrom` in the original matrix `E`. The columns `nxFrom` and `nyFrom` in `Etrans` are now lists of all the locations the pathways came from, similar to `nxTo` and `nyTo` in the original matrix `E`. To make the transpose, we first source the file that defines the function `transposeConnectivity()`:
+
+```{r source transposeConnectivity}
+  source('transposeConnectivity.R')
+```
+
+and then call it on E, and then add lat and lon to E
+
+```{r makeTranspose}
+  Etrans<-transposeConnectivity(E)
+  Etrans<-addLatLon2transpose(Etrans)
+```
+
+Now lets examine some results.
