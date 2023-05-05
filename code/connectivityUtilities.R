@@ -2,6 +2,7 @@ library(ncdf4)
 library(tidyverse,quietly=TRUE,warn.conflicts=FALSE) #get it to shut up!
 library(sf,quietly=TRUE,warn.conflicts=FALSE)
 library(collections,quietly=TRUE,warn.conflicts=FALSE)
+library(comprehenr,quietly=TRUE,warn.conflicts=FALSE)
 
 #if true, enable parallel operations. In general, you want to do this!
 #it makes, among other things, the combination of connectivity data 
@@ -213,6 +214,7 @@ nxny2lat <- function(nx,ny) {
   latVec<-lat[cbind(nx+Noff,ny+Noff)]
   return(latVec)
 }
+
 #this function takes a dispersal structure and returns its with all nx* and ny* variables 
 #suplemented with lon* and lat* values
 addLatLon<-function(E){
@@ -544,7 +546,252 @@ addLatLon2orgDist<-function(orgDist){
   return(orgDist)
 }
 
+#===============================================================================
+# This code defines a function transposeConnectivity() that takes a connectivity
+# matrix and creates its transpose. In this transposed matrix, nxTo and nyTo are
+# the model grid cells where the Lagrangian paths end, and in the data.frame()
+# are a list of integers, as are nxFrom and nyFrom in the original matrix E. The
+# columns nxFrom and nyFrom in Etrans are now lists of all the locations the
+# pathways came from, similar to nxTo and nyTo in the original matrix E.
+#
+# This code also provides a helper function, addLatLon2transpose() that does
+# what addLatLon does to a forward in time matrix, but to the transposed matrix.
 
+transposeConnectivity<-function(E) {
+  
+  #THIS CURRENT CODE IS SLOW, AND SHOULD BE PARALLELIZED. 
+  
+  # the first step is to make a dictionary that has as keys all (nxTo,nyTo) pairs
+  # in E, and as values a dictionary. The keys to that second dictionary are a
+  # (nxFrom,nyFrom) pair that went to (nxTo,nyTo), and the value are the number 
+  # of points that went from (nxFrom,nyFrom) to (nxTo,nyTo) (like numTo, but numFrom)
+  transDict=dict()
+  
+  #first we write the serial version of this code which iterates over rows in 
+  #E. The point of this code is to be clear and obvious. I can work on speed
+  #once it is correct. Knuth et al. 
+  tic('make dictionary')
+  for (n in 1:nrow(E)){
+    theRow<-E[n,]
+    
+    #this is the key to the inner dictionary
+    innerKey=c(theRow$nxFrom,theRow$nyFrom)
+    
+    #now loop over (nxTo,nyTo) pairs. Create a new entry into transDict if that
+    #key does not exist their, or update existing entry if it does. Assumes, as 
+    #should be true, that nxTo,nyTo and numTo have same length
+    for (nn in 1:length(theRow$numTo[[1]])){
+      outerKey=c(theRow$nxTo[[1]][nn],theRow$nyTo[[1]][nn])
+      thisDict=transDict$get(outerKey,dict()) #get dict
+      thisDict$set(innerKey,thisDict$get(innerKey,0)+theRow$numTo[[1]][nn]) #modify
+      transDict$set(outerKey,thisDict) #set it again
+    }
+  }
+  
+  
+  toc()
+  tic('loop over transDict')
+  
+  #ok, transDict has the inverted matrix. Now lets invert it
+  #I AM ASSUMING THAT THE ORDER OF ITEMS RETURNED FROM DICT IS STABLE
+  #OVER TIME IF I DO NOT INSERT ANYTHING INTO IT BETWEEN ACCESS...
+
+  transKeys<-transDict$keys()
+  #transValues<-transDict$values()
+  nxTo<-to_list(for(p in transKeys) as.numeric(p[[1]]))
+  nyTo<-to_list(for(p in transKeys) as.numeric(p[[2]]))
+  Etrans<-data.frame(nxTo=I(nxTo),nyTo=I(nyTo))
+  
+  #why do I have to do this to make plotting work?
+  class(Etrans$nxTo)<-"numeric"
+  class(Etrans$nyTo)<-"numeric"
+  
+  #now make columns of empty lists for remaining fields.
+  #Etrans$nxFrom<-rep(list(list()),nrow(Etrans))
+  #Etrans$nyFrom<-rep(list(list()),nrow(Etrans))  
+  #Etrans$numFrom<-rep(list(list()),nrow(Etrans))
+  Etrans$nxFrom<-rep(c(-1),nrow(Etrans))
+  Etrans$nyFrom<-rep(c(-1),nrow(Etrans))  
+  Etrans$numFrom<-rep(c(-1),nrow(Etrans))
+  
+  class(Etrans$nxFrom)<-"vector"
+  class(Etrans$nyFrom)<-"vector"
+  class(Etrans$numFrom)<-"vector"
+  
+  #now loop over transDict, and fill in lists. I know this is slow...
+  #but I can figure out its correctness easilly
+  for (n in 1:length(transKeys)) {
+    theKey<-transKeys[[n]]
+    innerDict<-transDict$get(theKey)
+    innerKeys<-innerDict$keys()
+    innerValues<-innerDict$values()
+    nxFromList<-to_list(for(p in innerKeys) as.numeric(p[[1]]))
+    nyFromList<-to_list(for(p in innerKeys) as.numeric(p[[2]]))
+    numFromList<-to_list(for(p in innerValues) as.numeric(p[[1]]))
+    
+    #no, I have no idea exactly why this works to put a list
+    #into a signle cell of a data.frame()
+    #Etrans[n,'nxFrom'][[1]]<-I(list(c(nxFromList,recursive=TRUE)))
+    #Etrans[n,'nyFrom'][[1]]<-I(list(c(nyFromList,recursive=TRUE)))
+    #Etrans[n,'numFrom'][[1]]<-I(list(c(numFromList,recursive=TRUE)))
+    
+    Etrans$nxFrom[n]<-list(c(nxFromList,recursive=TRUE))
+    Etrans$nyFrom[n]<-list(c(nyFromList,recursive=TRUE))
+    Etrans$numFrom[n]<-list(c(numFromList,recursive=TRUE))
+  }
+  
+  #the nxTo and nyTo should be just numbers, not lists, to match E not transposed
+  class(Etrans$nxTo)<-'numeric'
+  class(Etrans$nyTo)<-'numeric'
+  toc()
+  
+  return(Etrans)
+}
+
+#this function takes a TRANSPOSED dispersal structure and returns its with all nx* and ny* variables 
+#suplemented with lon* and lat* values
+addLatLon2transpose<-function(E){
+  #nxny2lonlat is defined in connectivityUtilities
+  returnVals<-nxny2lonlat(E$nxTo,E$nyTo)
+  
+  #do the "from", each a simple vector
+  E$lonTo<-returnVals$lonVec
+  E$latTo<-returnVals$latVec
+  
+  # #apply to each row for lonTo and latTo
+  # print('start apply 1')
+  # E$lonTo<-apply(E,1,nxny2lon)
+  # print('end apply 2')
+  # E$latTo<-apply(E,1,nxny2lat)
+  # print('done with applies')
+  
+  #print('hello')
+  
+  # this is not memory efficient, but is it fast?
+  nxFromList<-apply(E,1,function(a) {return(a$nxFrom)})
+  nyFromList<-apply(E,1,function(a) {return(a$nyFrom)})
+  E$lonFrom<-map2(nxFromList,nyFromList,nxny2lon)
+  E$latFrom<-map2(nxFromList,nyFromList,nxny2lat)
+  
+  return(E)
+}
+
+trimToOnlyFromPlacesTranspose<-function(EplusTrimmed){
+  #this code trims numTo,nxTo,nyTo,lonTo,latTo so they only contain (nx,ny)
+  #points that are (nxTo,nyTo) points
+  #make dictionary of (nxTo,nyTo), so we can quickly check if point is in
+  #the starting points
+  startPoints<-dict(EplusTrimmed$nxTo,map2(EplusTrimmed$nxTo,EplusTrimmed$nyTo,c)) #items, keys!
+  
+  #now, lets see if for this start point, which nxFrom,nyFrom are in the startPoints
+  #then trim nxFrom,nyFrom and numFrom to only include those points
+  if (!runParallel) {
+    #SERIAL CODE
+    if (debugOutput) {tic('serial core')}
+    for (np in 1:nrow(EplusTrimmed)){
+      #first find which *From's are also starting points
+      nxFrom<-EplusTrimmed$nxFrom[[np]]
+      nyFrom<-EplusTrimmed$nyFrom[[np]]
+      numFrom<-EplusTrimmed$numFrom[[np]]
+      allFrom<-map2(nxFrom,nyFrom,c)
+      inStarts<-unlist(map(allFrom,startPoints$has)) #map returns list of lists, unlist makes into a single list
+      
+      #print(np)
+      #now put trimmed records back into EplusTrimmed
+      EplusTrimmed$nxFrom[[np]]<-nxFrom[inStarts]
+      EplusTrimmed$nyFrom[[np]]<-nyFrom[inStarts]
+      EplusTrimmed$numFrom[[np]]<-numFrom[inStarts]
+      EplusTrimmed$lonFrom[[np]]<-EplusTrimmed$lonFrom[[np]][inStarts]
+      EplusTrimmed$latFrom[[np]]<-EplusTrimmed$latFrom[[np]][inStarts]
+    }
+  } else {
+    #PARALLEL CODE
+    #if (debugOutput) {tic('parallel core of subsetConnectivity_by*() runs in')}
+    cl=startCluster() #start cluster 
+    whatGot<-foreach(Erow=iter(EplusTrimmed,by='row'),.combine=rbind.data.frame,.packages="purrr",
+                     .multicombine=TRUE) %dopar% {
+                       #for details, see https://stackoverflow.com/questions/29828710/parallel-processing-in-r-for-a-data-frame
+                       nxFrom<-Erow$nxFrom[[1]]
+                       nyFrom<-Erow$nyFrom[[1]]
+                       numFrom<-Erow$numFrom[[1]]
+                       allFrom<-map2(nxFrom,nyFrom,c)
+                       inStarts<-unlist(map(allFrom,startPoints$has)) #map returns list of lists, unlist makes into a single list
+                       
+                       #print(np)
+                       #now put trimmed records back into Erow
+                       Erow$nxFrom[[1]]<-nxFrom[inStarts]
+                       Erow$nyFrom[[1]]<-nyFrom[inStarts]
+                       Erow$numFrom[[1]]<-numFrom[inStarts]
+                       Erow$lonFrom[[1]]<-Erow$lonFrom[[1]][inStarts]
+                       Erow$latFrom[[1]]<-Erow$latFrom[[1]][inStarts]
+                       Erow #this is the key line; this last line is what the foreach function returns for each iteration
+                     }
+    EplusTrimmed<-whatGot
+    stopCluster(cl) #stop the cluster.
+  }
+
+  return(EplusTrimmed)
+}
+
+subsetConnectivity_byPolygon_transpose<-function(Etrans,limitPoly,trimTo=FALSE){
+  #this code takes a connectivity dataframe that has had lat and lon added to it
+  #with addLatLon, and then subsets it to only include points that start within
+  #limitPoly. If trimTo=TRUE, it will not include To points that are not at
+  #locations which have nxFrom,nyFrom points. If trimTo=FALSE (the default), it
+  #will include all To points.
+  
+  #check if latitude and longitude exists 
+  if (!"lonFrom"%in% colnames(Etrans)) {
+    stop('Must call addLatLonTranspose() on connectivity data before calling this function')
+  }
+  
+  #make an sf sfc object (see https://geocompr.robinlovelace.net/index.html) of all the *From points
+  thePoints<-st_multipoint(matrix(cbind(Etrans$lonTo,Etrans$latTo),nrow(Etrans),2))
+  thePoints=st_sfc(thePoints,crs=4326) #convert to WGS84 coordinate system
+  
+  #make into list of points
+  thePoints<-st_cast(thePoints,'POINT')
+  
+  #which points are in limitPoly
+  inLimit<-st_contains(limitPoly,thePoints)
+  
+  #only include nxFrom,nyFrom that are inside polygon
+  EtransTrimmed<-Etrans[inLimit[[1]],]
+  
+  #if trimTo=True, then get all possible starting points from EtransTrimmed and
+  #store starting points as (nx,ny) in a dictionary from the collections
+  #library. use this dictionary to quickly determine find the
+  #nxTo,nyTo,lonTo,latTo and numTo which fall within starting region, and only
+  #include those in the output.
+  if (trimTo) {
+    EtransTrimmed<-trimToOnlyFromPlacesTranspose(EtransTrimmed)
+  }
+  
+  return(EtransTrimmed)
+}
+
+#for debugging, lets run it with a given data set to test 
+#transpose code
+if (FALSE) {
+  if (FALSE) {
+    #load from raw data file
+    regionName<-'theAmericas'
+    depth<-1
+    year<-'climatology'
+    verticalBehavior<-'starts'
+    month<-5
+    minPLD<-18; maxPLD<-minPLD
+    E<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
+  } else {
+    #use precomputed E
+    E<-readRDS('mayJuneEastCoast_connectivity.RDS')
+  }
+  print('starting transpose')
+  Etrans<-transposeConnectivity(E)
+  print('done, now add lat and lon')
+  Etrans<-addLatLon2transpose(Etrans)
+}
+#===============================================================================
 
 #===============================================================================
 #the code below here is for testing, and is wrapped in if-statements. Only 

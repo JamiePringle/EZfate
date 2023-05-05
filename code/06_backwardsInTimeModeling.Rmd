@@ -9,35 +9,111 @@ This code illustrates how to determine which Lagrangian pathways lead [**to**]{.
 
 **An important note**: In this section we read in the connectivity data, process it, and save it to a directory. As before, it is **important** that you run the code in a predictable way from a known location. In Rstudio, the easiest way to do this is to go to the "Session" menu, "Set Working Directory" item, and choose "To Source File Location." Your data files will then be saved into the directory this file is in, and the code will find the `model_depth_and_distance.nc` in the `connectivityData` directory within it. You can also explicitly call the setwd('/directory/with/data') function to specify where the data will be kept.
 
-The functions in `connectivityUtilities.R` are still needed, so lets load that.
-
-```{r sourceTheCode, messages=FALSE}
-source('connectivityUtilities.R')
-```
-
-As described in [**03_getData_Subset_and_Combine**](03_GetData_Subset_and_Combine.html), we can use the `getConnectivityData` package to get a connectivity matrix for a particular region and PLD. Here we choose a specific year, but we could have as well chosen a climatology. We save the matrix into the variable **E**.
+As described in [**03_getData_Subset_and_Combine**](03_GetData_Subset_and_Combine.html), we can use the `getConnectivityData` package to get a connectivity matrix for a particular region and PLD. Here we choose the E we created earlier in `03_GetData_Subset_and_Combine.Rmd`. This connectivity has the latitude and longitude data added, but this is not required.
 
 ```{r getData}
-  regionName<-'theAmericas'
-  depth<-1
-  year<-2007
-  verticalBehavior<-'starts'
-  month<-5
-  minPLD<-18; maxPLD<-minPLD
-  E<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
+  E<-readRDS('mayJuneEastCoast_connectivity.RDS')
 ```
 
-To understand the backwards in time modeling, we need to "transpose" the connectivity into the matrix Etrans. In this transposed matrix, `nxTo` and `nyTo` are the model grid cells where the Lagrangian paths end, and in the data.frame() are a list of integers, as are `nxFrom` and `nyFrom` in the original matrix `E`. The columns `nxFrom` and `nyFrom` in `Etrans` are now lists of all the locations the pathways came from, similar to `nxTo` and `nyTo` in the original matrix `E`. To make the transpose, we first source the file that defines the function `transposeConnectivity()`:
+To understand the backwards in time modeling, we need to "transpose" the connectivity into the matrix Etrans. In this transposed matrix, `nxTo` and `nyTo` are the model grid cells where the Lagrangian paths end, and in the data.frame() are a list of integers, as are `nxFrom` and `nyFrom` in the original matrix `E`. The columns `nxFrom` and `nyFrom` in `Etrans` are now lists of all the locations the pathways came from, similar to `nxTo` and `nyTo` in the original matrix `E`. To make the transpose, we first source `connectivityUtilities.R` and then call it on E. The new Etrans does not have latitude and longitude, so lets add latitude and longitude to Etrans after we create it.
 
-```{r source transposeConnectivity}
-  source('transposeConnectivity.R')
-```
-
-and then call it on E, and then add lat and lon to E
+Note well: as currently written, the `transposeConnectivity()` function is very slow. At a minimum, it still needs to be palatalized. So if you can subset E, you should do so before transposing. This speed issue shall be addressed in future release.
 
 ```{r makeTranspose}
+  source('connectivityUtilities.R')
   Etrans<-transposeConnectivity(E)
   Etrans<-addLatLon2transpose(Etrans)
 ```
 
-Now lets examine some results.
+# Plot where particles came from
+
+Now lets visualize the backwards-in-time connectivity. This code is very similar to that in `04_dataStructures_and_basicPlotting.Rmd`, but with (nxFrom, nyFrom) and (nxTo,nyTo) switched (and similarly for (lonFrom, latFrom) and (lonTo,latTo)), and numTo replaced with numFrom.
+
+For the first task, lets define a polygon and ask where particles that ended up in that polygon may have come from. For example, imagine you have data from an offshore station, and you are wondering what the coastal origin of that water might have been?
+
+First, define a polygon that encompasses the region where the particles are released. I find it easiest to find the corners using Google maps.
+
+```{r getStartPoints}
+  #define limits of a box that defines the release locations
+  lonLimits=c(-70.0,-65.0) #longitude of corners
+  latLimits=c(35.0,40.0) #latitude of corners
+  limitPoly=st_polygon(list(cbind(lonLimits[c(1,2,2,1,1)],latLimits[c(1,1,2,2,1)])))
+  limitPoly<-st_sfc(limitPoly,crs=4326) #make into a surface, 4326 is WGS84
+```
+
+Now further subset E to only include (lonTo,latTo) ending locations that lie within the polygon. `subsetConnectivity_byPolygon_transpose()` is like `subsetConnectivity_byPolygon()`, but it trims by the (lonTo,latTo) locations.
+
+```{r subsetStarts}
+  #subset connectivity data
+  EendPoints<-subsetConnectivity_byPolygon_transpose(Etrans,limitPoly,trimTo=FALSE)
+```
+
+Now combine each row in `EstartPoints` and make a data.frame with each location particles have ended up (lonTo,latTo), and the total number of particles that get to that point.
+
+```{r clumpFrom}
+    allFrom<-data.frame(lonFrom=c(EendPoints$lonFrom,recursive=TRUE),
+                      latFrom=c(EendPoints$latFrom,recursive=TRUE),
+                      numFrom=c(EendPoints$numFrom,recursive=TRUE))
+```
+
+and them add together the total number of points that get to the same `(lonFrom,latFrom)` points
+
+```{r combinePoints}
+    whereAllCameFrom<-allFrom %>% group_by(lonFrom,latFrom) %>% summarise(numFrom=sum(numFrom))
+```
+
+Now set up the graphics
+
+```{r setupNaturalFeatures}
+    library(sf)
+    library(ggplot2)
+    library("rnaturalearth")
+    library("rnaturalearthdata")
+    world <- ne_countries(scale = "medium", returnclass = "sf") #get coastline data
+    class(world)
+```
+
+We can now visualize where the points that ended in the polygon came from. In the plot before, the green points are the ending locations inside of the polygon defined above, and the blue points are where they started from.
+
+```{r plotWhereTo}
+    p<-ggplot(data = world) + geom_sf() +
+      coord_sf(xlim= c(-82, -55), ylim = c(24, 46), expand = FALSE)
+    p<-p+geom_point(data = EendPoints, aes(x = lonTo, y = latTo), size = 1, shape = 23, fill = "green",color='green')
+    p<-p+geom_point(data = whereAllCameFrom, aes(x = lonFrom, y = latFrom, fill=numFrom,colour=numFrom), size = 1, shape = 23)
+    #p<-p+geom_point(data = Etrans, aes(x = lonTo, y = latTo), size = 0.5, shape = 23, fill = "green",color='green')
+    print(p) #this makes the figure appear
+```
+
+Here is a further example. Lets choose a region between the mouths of Deleware and Chesapeake bay, and ask where the particles in that region had come from. The logic is as before. First, define a polygon:
+
+```{r getStartPointsAgain}
+  #define limits of a box that defines the release locations
+  lonLimits=c(-76.0,-74.6) #longitude of corners
+  latLimits=c(37.25,38.6) #latitude of corners
+  limitPoly=st_polygon(list(cbind(lonLimits[c(1,2,2,1,1)],latLimits[c(1,1,2,2,1)])))
+  limitPoly<-st_sfc(limitPoly,crs=4326) #make into a surface, 4326 is WGS84
+```
+
+Now subset by polygon, process, and plot, as before.
+
+```{r processAndPlot}
+  #subset connectivity data
+  EendPoints<-subsetConnectivity_byPolygon_transpose(Etrans,limitPoly,trimTo=FALSE)
+  
+  #process to find how many points came from each "from" point
+  allFrom<-data.frame(lonFrom=c(EendPoints$lonFrom,recursive=TRUE),
+                      latFrom=c(EendPoints$latFrom,recursive=TRUE),
+                      numFrom=c(EendPoints$numFrom,recursive=TRUE))
+  whereAllCameFrom<-allFrom %>% group_by(lonFrom,latFrom) %>% summarise(numFrom=sum(numFrom))
+  
+  #and now set up and draw the graphics
+  p<-ggplot(data = world) + geom_sf() +
+      coord_sf(xlim= c(-82, -55), ylim = c(24, 46), expand = FALSE)
+  p<-p+geom_point(data = whereAllCameFrom, aes(x = lonFrom, y = latFrom, 
+                    fill=numFrom,colour=numFrom), 
+                    size = 1, shape = 23)
+  p<-p+geom_point(data = EendPoints, aes(x = lonTo, y = latTo), 
+                  size = 1, shape = 23, fill = "green",color='green')
+    #p<-p+geom_point(data = Etrans, aes(x = lonTo, y = latTo), size = 0.5, shape = 23, fill = "green",color='green')
+    print(p) #this makes the figure appear
+```

@@ -26,7 +26,7 @@ To quickly see what you need to do generate these figures, and to adapt this res
 -   [**03_getData_Subset_and_Combine**](03_GetData_Subset_and_Combine.html): How to retrive the dispersal data you need, and subsetted by space, relese time, and time drifting with the currents as appropiate to your project.
 -   [**04_dataStructure_and_basicPlotting**](04_dataStructures_and_basicPlotting.html): A description of how the connectivity data is stored in R, and how to make simple plots of the dispersal data. At the end of this, you will be able to plot where particles released at a single point go, and where all the particles from an arbitrary region go.
 -   [**05_connectivityModeling**](05_connectivityModeling.html): The particle fate data obtained above can be used to model the dispersal of particles over multiple releases in a defined habitat. This can be used to model connectivity of marine populations. How to define a habitat and model dispersal is described here for a simple 1 species model with no density dependence.
--   **06_backwardsInTimeModeling**: Often it will be important to understand where particles which have arrived at a specific place came from. This describes how to start doing this. *This has not yet been finished*
+-   [**06_backwardsInTimeModeling**](06_backwardsInTimeModeling.html): Often it will be important to understand where particles which have arrived at a specific place came from. This describes how to start doing this.
 
 To download the code to run it locally, go to the [gitHub directiory](https://github.com/JamiePringle/EZfate) and look at the right-hand side toolbar for the "Releases" tab and click on the green "latest" button, or go [to this page.](https://github.com/JamiePringle/EZfate/releases/)
 

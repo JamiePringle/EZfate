@@ -29,12 +29,14 @@ library(tidyverse)
 library(sf)
 library(collections)
 library(iterators)
+library(comprehenr,quietly=TRUE)
 library(furrr) #optional, but highly recommend to allow parallel processing
 library(doParallel) #optional, but highly recommend to allow parallel processing
 library(foreach) #optional, but highly recommend to allow parallel processing
 library(tictoc) #optional, only needed for debugging runs
 library(rnaturalearth) #only needed for graphics 
 library(rnaturalearthdata) #only needed for graphics
+
 
 ```
 
