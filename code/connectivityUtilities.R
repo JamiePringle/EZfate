@@ -580,11 +580,13 @@ transposeConnectivity<-function(E) {
     #now loop over (nxTo,nyTo) pairs. Create a new entry into transDict if that
     #key does not exist their, or update existing entry if it does. Assumes, as 
     #should be true, that nxTo,nyTo and numTo have same length
-    for (nn in 1:length(theRow$numTo[[1]])){
-      outerKey=c(theRow$nxTo[[1]][nn],theRow$nyTo[[1]][nn])
-      thisDict=transDict$get(outerKey,dict()) #get dict
-      thisDict$set(innerKey,thisDict$get(innerKey,0)+theRow$numTo[[1]][nn]) #modify
-      transDict$set(outerKey,thisDict) #set it again
+    if (!is.null(theRow$nxTo[[1]][1])){
+      for (nn in 1:length(theRow$numTo[[1]])){
+        outerKey=c(theRow$nxTo[[1]][nn],theRow$nyTo[[1]][nn])
+        thisDict=transDict$get(outerKey,dict()) #get dict
+        thisDict$set(innerKey,thisDict$get(innerKey,0)+theRow$numTo[[1]][nn]) #modify
+        transDict$set(outerKey,thisDict) #set it again
+      }
     }
   }
   
