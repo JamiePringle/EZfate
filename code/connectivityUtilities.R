@@ -500,6 +500,12 @@ makeConnectionDict<-function(E){
   return(connectDict)
 }
 
+#same as above, but backwards in time
+makeConnectionDict_BackwardsInTime<-function(E){
+  connectDict<-dict(1:nrow(E),map2(E$nxTo,E$nyTo,c)) #items, keys!
+  return(connectDict)
+}
+
 #this function takes a data.frame orgDist with columns nx, ny and num that
 #represent the distribution of organisms; the connectivity structure E; and a
 #connection dictionary connectDict (made with makeConnectDict()). It returns a
@@ -534,6 +540,126 @@ propagateOneGeneration<-function(E,connectDict,orgDist,R) {
   return(nextGen)
 }
 
+#this appears to be the same as the function above but backwards in time. 
+#But it is fundamentally different in that each organism in orgDist gets moved
+#to one and only one random location. The variable connectDict must be 
+#created by makeConnectionDict_BackwardsInTime(). Note that there is no
+#growth rate R, because lineages do not multiply backwards in time.
+propagateOneGeneration_BackwardsInTime<-function(E,connectDict,orgDist) {
+  tic('run one generation')
+  if (FALSE) { 
+    #SERIAL CODE PATH
+    #now build the next generation. I am sure this could be done more efficiently...
+    nextGen<-data.frame()
+    for (nCrit in 1:nrow(orgDist)){
+      #the as.integer is because c() by default makes num
+      theKey<-c(orgDist$nx[nCrit],orgDist$ny[nCrit])
+      whichRow<-connectDict$get(theKey)
+      theRow<-E[whichRow,]
+      
+      #now we need to pick a random entry from nxFrom and nyFrom, with a frequency
+      #appropriate to the number in numFrom
+      nxFrom<-theRow$nxFrom[[1]]
+      nyFrom<-theRow$nyFrom[[1]]
+      numFrom<-theRow$numFrom[[1]]
+      
+      #now use cumlilative sum and weighted bisection to appropriately pick 
+      #which *From point to go to next. The rightmost.close in findInterval
+      #is important -- see documentation for findInterval
+      theCDF<-cumsum(numFrom)/sum(numFrom)
+      unifRand<-runif(n=1)
+      thePoint<-findInterval(unifRand,theCDF,rightmost.close=TRUE)+1
+      
+      #I am sure this bit could be speeded up immensly by not
+      #creating a new data frame and then combining it...
+      nxPast<-theRow$nxFrom[[1]][thePoint]
+      nyPast<-theRow$nyFrom[[1]][thePoint]
+      numPast<-orgDist$num[nCrit]
+      newRecruits<-data.frame(nx=nxPast,ny=nyPast,num=numPast)
+      nextGen<-rbind(nextGen,newRecruits)
+    }
+  } else {
+    #PARALLEL CODE PATH
+    #cl=startCluster() #more efficient if I don't start each generation?
+
+        #nextGen <- foreach(theOrg=iter(orgDist,by='row'),.combine=rbind.data.frame,.packages="purrr",
+        #                   .multicombine=TRUE) %dopar% {
+
+    if (FALSE) {
+      #this breaks theOrg up into single rows
+      #nextGen <- foreach(theOrg=iter(orgDist,by='row'),.combine=rbind,.multicombine=TRUE) %dopar% {
+      nextGen <- foreach(nr=1:nrow(orgDist),.combine=rbind,.multicombine=TRUE) %dopar% {
+        theOrg<-orgDist[nr,]
+        theKey<-c(theOrg$nx[1],theOrg$ny[1])
+        whichRow<-connectDict$get(theKey)
+        theRow<-E[whichRow,]
+        
+        #now we need to pick a random entry from nxFrom and nyFrom, with a frequency
+        #appropriate to the number in numFrom
+        nxFrom<-theRow$nxFrom[[1]]
+        nyFrom<-theRow$nyFrom[[1]]
+        numFrom<-theRow$numFrom[[1]]
+        
+        #now use cumlilative sum and weighted bisection to appropriately pick 
+        #which *From point to go to next. The rightmost.close in findInterval
+        #is important -- see documentation for findInterval
+        theCDF<-cumsum(numFrom)/sum(numFrom)
+        unifRand<-runif(n=1)
+        thePoint<-findInterval(unifRand,theCDF,rightmost.close=TRUE)+1
+        
+        #I am sure this bit could be speeded up immensly by not
+        #creating a new data frame and then combining it...
+        nxPast<-theRow$nxFrom[[1]][thePoint]
+        nyPast<-theRow$nyFrom[[1]][thePoint]
+        numPast<-theOrg$num[1]
+        newRecruits<-data.frame(nx=nxPast,ny=nyPast,num=numPast)
+        newRecruits ##this is the key line; this last line is what the foreach function returns for each iteration
+      }
+    } else {
+      #this breaks theOrg up into chunks of size nChunk
+      nChunk<-1000
+      #WARNING, THIS IS NOT PARALLEL CODE. FOR IT TO BE PARALEL, %DO% SHOULD BE %DOPAR%
+      #BUT I AM HAVING TROUBLE MAKING THIS EFFICIENT (I.E. NOT 10 TIMES SLOWER THAN SERIAL...)
+      nextGen <- foreach(orgChunk=split(orgDist,(seq(nrow(orgDist))-1) %/% nChunk),
+                         .combine=rbind,.multicombine=TRUE) %do% {
+        nextGen<-data.frame()
+        for (nr in 1:nrow(orgChunk)) {
+          theOrg<-orgChunk[nr,]
+          theKey<-c(theOrg$nx[1],theOrg$ny[1])
+          whichRow<-connectDict$get(theKey)
+          theRow<-E[whichRow,]
+          
+          #now we need to pick a random entry from nxFrom and nyFrom, with a frequency
+          #appropriate to the number in numFrom
+          nxFrom<-theRow$nxFrom[[1]]
+          nyFrom<-theRow$nyFrom[[1]]
+          numFrom<-theRow$numFrom[[1]]
+          
+          #now use cumlilative sum and weighted bisection to appropriately pick 
+          #which *From point to go to next. The rightmost.close in findInterval
+          #is important -- see documentation for findInterval
+          theCDF<-cumsum(numFrom)/sum(numFrom)
+          unifRand<-runif(n=1)
+          thePoint<-findInterval(unifRand,theCDF,rightmost.close=TRUE)+1
+          
+          #I am sure this bit could be speeded up immensly by not
+          #creating a new data frame and then combining it...
+          nxPast<-theRow$nxFrom[[1]][thePoint]
+          nyPast<-theRow$nyFrom[[1]][thePoint]
+          numPast<-theOrg$num[1]
+          newRecruits<-data.frame(nx=nxPast,ny=nyPast,num=numPast)
+          nextGen<-rbind(nextGen,newRecruits)
+        }
+        #print(paste('in chunk loop, size of nextGen is',nrow(nextGen)))
+        nextGen ##this is the key line; this last line is what the foreach function returns for each iteration
+      } 
+    }
+    #stopCluster(cl)
+  }
+  toc()
+  return(nextGen)
+}
+
 #this function adds lat and lon to the orgDist data frame to make plotting
 #easier. 
 addLatLon2orgDist<-function(orgDist){
@@ -547,6 +673,106 @@ addLatLon2orgDist<-function(orgDist){
 }
 
 #===============================================================================
+#make code to create a transpose of E for backwards in time calculations
+
+#READ THE DOCUMENTATION FOR transposeConnectivity() first! This function cleans
+#up Etrans returned by transposeConnectivity() so that all (nxFrom,nyFrom) pairs
+#also exist as (nxTo,nyTo) pairs, and all (nxTo,nyTo) pairs have associated
+#(nxFrom,nyFrom) points. It must be called iteratively, because as some
+#(nxFrom,nyFrom) pairs are removed, other (nxTo,nyTo) pairs may become invalid.
+#So we must repeat till it cleans nothing.
+sanitizeConnectivity<-function(Etrans){
+  
+  #THIS CODE IS SLOW BUT SIMPLE. IT COULD BE MADE FASTER, BUT
+  #FOR NOW, LETS KEEP IT SUPER-CLEAR, BECAUSE THERE ARE SOME
+  #TWISTING EDGE CASES
+  
+  #This flag is set to True if any changes are made to Etrans. 
+  #This forces a recursive call to this function
+  changedEtrans=FALSE
+  
+  #First make a dictionary that has as keys all of the (nxTo,nyTo) pairs, and
+  #then loop over rows of Etrans and see if there are any (nxFrom,nyFrom) that
+  #are not in (nxTo,nyTo)
+  connectDict<-makeConnectionDict_BackwardsInTime(Etrans)
+  
+  tic('found homeless (nxFrom,nyFrom) pairs in')
+  homelessFroms=dict() #store homeless pairs of (*Froms)
+  for (n in 1:nrow(Etrans)) {
+    nxFrom=Etrans[n,]$nxFrom[[1]]
+    nyFrom=Etrans[n,]$nyFrom[[1]]
+    for (nn in 1:length(nxFrom)) {
+      if (!connectDict$has(c(nxFrom[nn],nyFrom[nn]))){
+        homelessFroms$set(c(nxFrom[nn],nyFrom[nn]),TRUE)
+      }
+    }
+  }
+  toc()
+  print(paste(homelessFroms$size(),'homeless pairs'))
+  
+  #now, if homelessFroms has no elements, we don't need to fix anything
+  #but if it does, we need to remove the (nxFrom,nyFrom) not in (nxTo,nyTo)
+  #from Etrans
+  tic('removed homeless (nxFrom,nyFrom) pairs in')
+  nchanged=0
+  if (homelessFroms$size()>0) {
+    changedEtrans=TRUE
+    for (n in 1:nrow(Etrans)) {
+      nxFrom=Etrans[n,]$nxFrom[[1]]
+      nyFrom=Etrans[n,]$nyFrom[[1]]
+      numFrom=Etrans[n,]$numFrom[[1]]
+      keepMe<-is.finite(nxFrom) #this boolean of what to keep, should be all TRUE now
+      for (nn in 1:length(nxFrom)) {
+        if (homelessFroms$has(c(nxFrom[nn],nyFrom[nn]))){
+          keepMe[nn]=FALSE
+        }
+      }
+      if (sum(!keepMe)>0) {
+        #the if above is not necessary, but replacing the arrays is 
+        #expensive, so worth skipping if you can, which you mostly can
+        nchanged<-nchanged+1
+        Etrans[n,]$nxFrom[[1]]<-nxFrom[keepMe]
+        Etrans[n,]$nyFrom[[1]]<-nyFrom[keepMe]
+        Etrans[n,]$numFrom[[1]]<-numFrom[keepMe]
+      }
+      if (n%%25000==0) {
+        print(paste('scanned row',n,'of',nrow(Etrans),'for homeless (nxFrom,nyFrom) pairs, changed',nchanged))
+      }
+    }
+  } else {
+    print('No more (nxFrom,nyFrom) pairs that would end lineage')
+  }
+  toc()
+  
+  #now we need to check to see if any of the rows of Etrans have 
+  #empty nxFrom, nyFrom and numFrom cells. If so, we need to remove
+  #that (nxTo,nyTo) row. 
+  tic('removed empty (nxTo,nyTo) rows in')
+  numFrom<-map(Etrans$nxFrom,function(x){length(x)[1]})
+  numFrom<-as.numeric(numFrom)
+  
+  #check if any of numFrom are 0, and if so set flag that we are 
+  #modifying Etrans, and then delete those rows
+  indxBad<-numFrom==0
+  if (sum(indxBad)>0) {
+    changedEtrans=TRUE
+    indxKeep<-numFrom>0
+    Etrans<-Etrans[indxKeep,]
+  }
+  toc()
+  
+  if (changedEtrans) {
+    print(paste('Recursing into sanitizeConnectivity after deleting',homelessFroms$size(),
+                '(nxFrom,nyFrom) pairs and',sum(indxBad),'bad (nxTo,nyTo) rows'))
+    Etrans<-sanitizeConnectivity(Etrans)
+  } else {
+    print('Done with sanitizeConnectivity')
+  }
+  
+  return(Etrans)
+}
+
+
 # This code defines a function transposeConnectivity() that takes a connectivity
 # matrix and creates its transpose. In this transposed matrix, nxTo and nyTo are
 # the model grid cells where the Lagrangian paths end, and in the data.frame()
@@ -556,7 +782,6 @@ addLatLon2orgDist<-function(orgDist){
 #
 # This code also provides a helper function, addLatLon2transpose() that does
 # what addLatLon does to a forward in time matrix, but to the transposed matrix.
-
 transposeConnectivity<-function(E) {
   
   #THIS CURRENT CODE IS SLOW, AND SHOULD BE PARALLELIZED. 
@@ -647,8 +872,14 @@ transposeConnectivity<-function(E) {
   class(Etrans$nyTo)<-'numeric'
   toc()
   
+  #now, alas, there are some issues to be fixed. See the comment on sanitizeConnectivity()
+  #above
+  Etrans<-sanitizeConnectivity(Etrans)
+  
   return(Etrans)
 }
+
+
 
 #this function takes a TRANSPOSED dispersal structure and returns its with all nx* and ny* variables 
 #suplemented with lon* and lat* values
