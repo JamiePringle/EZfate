@@ -12,7 +12,7 @@ Monthly and climatological data are formed from twice-a-day particle releases at
 
 Pathways have been calculated for the years 2007-2020 for all of the depths above for the coasts of North and South America. 
 
-Global pathway calculation is underway now for years 2007-2022. The status of depth of release and depth keeping behavior is given below. Blank indicates that it has not yet been done. "Fixed Depth Behavior" indicates particles are only advected in horizontal directions by ocean currents, "Variable Depth Behavior" indicates that they are advected by both horizontal and vertical behavior. 
+Global pathway calculation is underway now for years 2007-2022. The status of depth of release and depth keeping behavior is given below. Blank indicates that it has not yet been done. "Fixed Depth Behavior" indicates particles are only advected in horizontal directions by ocean currents, "Variable Depth Behavior" indicates that they are advected by both horizontal and vertical currents. 
 
 |Depth|Fixed Depth Behavior|Variable Depth Behavior|
 |-----|--------------------|-----------------------|
