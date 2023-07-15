@@ -1,0 +1,163 @@
+---
+title: "animateDispersal"
+author: "James Pringle"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## *Setup*
+
+*Load libraries and setup for graphics. See the instruction files for details, in particular `03_GetData_Subset_and_Combine.html` and `04_dataStructures_and_basicPlotting.html`.*
+
+```{r setup}
+source('connectivityUtilities.R')
+library(sf)
+library(ggplot2)
+library("rnaturalearth")
+library("rnaturalearthdata")
+world <- ne_countries(scale = "medium", returnclass = "sf") #get coastline data
+class(world)
+```
+
+## *Get on PLD and plot dispersal.*
+
+*Lets get dispersal data for one PLD and several months in order to plot dispersal from a single region for that PLD. Later, we will use this logic to animate over PLD.*
+
+```{r get data one PLD}
+
+#make a data frame that contains where all points went as a function of PLD for a 
+#given polygon. The resulting data frame will contain this data for many PLD, and 
+#the data frame will have each row labled with the PLD, so we can animate it below. This 
+#will be called whereAllWentAllPLD
+whereAllWentAllPLD=data.frame()
+
+for (minPLD in seq(16,18,2)) {
+  tic(paste('working on PLD',minPLD))
+  print(paste('starting PLD',minPLD))
+  Eall<-data.frame()
+  tic('getting all the data')
+  for (regionName in c('theAmericas')) {
+    print(paste('working on',regionName))
+    
+    #define depth and year/climatology and vertical behavior
+    depth<-1; depthName=paste('_',as.character(depth),'m',sep='')
+    year<-'climatology'
+    verticalBehavior<-'starts'
+    
+    PLDname=paste('PLD',as.character(minPLD),sep=''); maxPLD<-minPLD
+    
+    #get data
+    tic('getting data')
+    if (TRUE) {
+      timeName='AprMayJune_'
+      month<-4; E1<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
+      month<-5; E2<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
+      month<-6; E3<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
+    } 
+    toc()
+    
+    #trim to land
+    #tic(paste('have trimmed',regionName))
+    #trimTo=TRUE
+    #E1<-subsetConnectivity_byGridValue(E1,gridDist,0.0,2.1,trimTo=trimTo)
+    #E2<-subsetConnectivity_byGridValue(E2,gridDist,0.0,2.1,trimTo=trimTo)
+    #E3<-subsetConnectivity_byGridValue(E3,gridDist,0.0,2.1,trimTo=trimTo)
+    #toc() 
+    
+    #now add lat and lon to all the files, and then subset to small region
+    #define limits of a box that defines the release locations
+    tic('add lat lons')
+    if (TRUE) {
+      polyName<-'EastFlorida'
+      lonLimits=c(-82.0,-80) #longitude of corners
+      latLimits=c(28.0,30.0) #latitude of corners
+      limitPoly=st_polygon(list(cbind(lonLimits[c(1,2,2,1,1)],latLimits[c(1,1,2,2,1)])))
+    }
+    limitPoly<-st_sfc(limitPoly,crs=4326) #make into a surface, 4326 is WGS84
+    E1<-addLatLon(E1)
+    E2<-addLatLon(E2)
+    E3<-addLatLon(E3)
+    toc()
+    
+    #now make file name for output
+    dataFileName<-paste('connectivityData/',timeName,polyName,sep='')
+    
+    tic('subset by polygon')
+    E1<-subsetConnectivity_byPolygon(E1,limitPoly,trimTo=FALSE)
+    E2<-subsetConnectivity_byPolygon(E2,limitPoly,trimTo=FALSE)
+    E3<-subsetConnectivity_byPolygon(E3,limitPoly,trimTo=FALSE)
+    toc()
+    
+    
+    tic(paste('have combined',regionName))
+    E<-combineConnectivityData(E1,E2)
+    E<-combineConnectivityData(E,E3)
+    toc()
+    
+    if (nrow(Eall)==0) {
+      Eall<-E
+    }
+    else {
+      tic(paste('have combined',regionName,'with other regions'))
+      Eall<-combineConnectivityData(Eall,E)
+      toc()
+    }
+  }
+  toc()
+  
+  tic('making allTo and whereAllWent')
+  #now lets combine each row in Eall and make data.frame with each location particles get
+  #to and the total number of particles that get there.
+  allTo<-data.frame(lonTo=c(Eall$lonTo,recursive=TRUE),
+                    latTo=c(Eall$latTo,recursive=TRUE),
+                    numTo=c(Eall$numTo,recursive=TRUE))
+  
+  #and them add together the total number of points that get to the same (lonTo,latTo) points
+  whereAllWent<-allTo %>% group_by(lonTo,latTo) %>% summarise(numTo=sum(numTo))
+  
+  #normalize by number that came to this point
+  whereAllWent$fracTo<-whereAllWent$numTo/sum(Eall$numLaunched)
+  
+  #add a PLD column
+  whereAllWent$PLD<-minPLD
+  toc()
+  
+  tic(paste('adding PLD',minPLD,' to whereAllWentAllPLD'))
+  #and add to whereAllWentAllPLD
+  whereAllWentAllPLD<-rbind(whereAllWentAllPLD,whereAllWent[c('lonTo','latTo',
+                                                              'numTo','fracTo','PLD')])
+  toc()
+  
+  #let people know how long things are taking per PLD
+  toc()
+}
+```
+
+Now, this takes a long time to run -- so lets save it using the dataFileName directory defined in the block above
+
+```{r save data to RDS}
+saveRDS(whereAllWentAllPLD,file=dataFileName)
+```
+
+```{r now lets animate...}
+library(gganimate) #to make this work, you might also have to install the gifski library
+    
+dpad=20.0
+p<-ggplot(data = world) + geom_sf() + 
+      coord_sf(xlim= c(lonLimits[1]-dpad, lonLimits[2]+dpad), 
+               ylim = c(latLimits[1]-dpad,latLimits[2]+dpad), expand = FALSE)+
+      geom_point(data = whereAllWentAllPLD, aes(x = lonTo, y = latTo,
+                                                fill=log10(fracTo),
+                                            colour=log10(fracTo)), 
+                 size = 1, shape = 23)+
+  transition_manual(PLD)
+      #ggtitle('the starting location is the red dot,\nthe bright green is the distribution after 1 generation,\nand the dark green is the habitat')
+    #print(p) #this makes the figure appear in interactive sessions
+    anim_save('dispersalExpand.gif',p)
+```
+
+If you are running this interactively, and can't find your plot in the plot window, either load the file `dispersalExpand.gif` into your browser, or type `print(p)`... Also look at any error messages that are generated -- you may need to install the `gifski` package.

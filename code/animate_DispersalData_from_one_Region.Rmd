@@ -1,0 +1,62 @@
+---
+title: "animateDispersal"
+author: "James Pringle"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## *Setup*
+
+*Load libraries and setup for graphics. See the instruction files for details, in particular `03_GetData_Subset_and_Combine.html` and `04_dataStructures_and_basicPlotting.html`.*
+
+```{r setup}
+source('connectivityUtilities.R')
+library(sf)
+library(ggplot2)
+library("rnaturalearth")
+library("rnaturalearthdata")
+world <- ne_countries(scale = "medium", returnclass = "sf") #get coastline data
+class(world)
+```
+
+## *Get dispersal data for region.*
+
+Use the dispersal data calculated in save_DispersalData_fromRegion.R or save_DispersalData_fromRegion.Rmd to make an animated dispersal diagram.
+
+```{r load data from RDS}
+dataFileName='connectivityData/AprMayJune_EastFlorida'; titleStr='April-June climatological release'
+#dataFileName='connectivityData/AprMayJune_QuintanaRoo'; titleStr='April-June climatological release'
+whereAllWentAllPLD<-readRDS(paste(dataFileName,'.RDS',sep=''))
+whereAllStarted<-readRDS(paste(dataFileName,'_startPoints.RDS',sep=''))
+```
+
+```{r now lets animate...}
+library(gganimate) #to make this work, you might also have to install the gifski library
+
+#specify region to plot    
+lonLimits=c(-105.0,-60) #longitude of corners
+latLimits=c(8.0,50.0) #latitude of corners
+
+#get initial distribution of particles
+
+dpad=0.0
+p<-ggplot(data = world) + geom_sf() + 
+      coord_sf(xlim= c(lonLimits[1]-dpad, lonLimits[2]+dpad), 
+               ylim = c(latLimits[1]-dpad,latLimits[2]+dpad), expand = FALSE)+
+      geom_point(data = whereAllWentAllPLD, aes(x = lonTo, y = latTo,
+                                                fill=log10(fracTo),
+                                            colour=log10(fracTo)), 
+                 size = 1, shape = 23)+
+  geom_point(data=whereAllStarted,aes(x=lonFrom,y=latFrom),colour='green')+
+  #gganimate specific bits
+  labs(title=paste(titleStr,'PLD: {current_frame} days'))+transition_manual(PLD)
+
+anim_save(paste(dataFileName,'.gif',sep=''),p)
+print(p)    
+```
+
+If you are running this interactively, and can't find your plot in the plot window, either load the file `dispersalExpand.gif` into your browser, or type `print(p)`... Also look at any error messages that are generated -- you may need to install the `gifski` package.

@@ -1,0 +1,78 @@
+---
+title: "animateDispersal"
+author: "James Pringle"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## *Setup*
+
+*Load libraries and setup for graphics. See the instruction files for details, in particular `03_GetData_Subset_and_Combine.html` and `04_dataStructures_and_basicPlotting.html`.*
+
+```{r setup}
+source('connectivityUtilities.R')
+library(sf)
+library(ggplot2)
+library("rnaturalearth")
+library("rnaturalearthdata")
+world <- ne_countries(scale = "medium", returnclass = "sf") #get coastline data
+class(world)
+```
+
+## *Get dispersal data for region.*
+
+Use the dispersal data calculated in save_DispersalData_fromRegion.R or save_DispersalData_fromRegion.Rmd to make an animated dispersal diagram.
+
+```{r load data from RDS}
+dataFileName1='connectivityData/AprMayJune_EastFlorida'; titleStr='April-June climatological release'
+dataFileName2='connectivityData/AprMayJune_QuintanaRoo'; titleStr='April-June climatological release, log10(particle density),'
+whereAllWentAllPLD1<-readRDS(paste(dataFileName1,'.RDS',sep=''))
+whereAllStarted1<-readRDS(paste(dataFileName1,'_startPoints.RDS',sep=''))
+whereAllWentAllPLD2<-readRDS(paste(dataFileName2,'.RDS',sep=''))
+whereAllStarted2<-readRDS(paste(dataFileName2,'_startPoints.RDS',sep=''))
+```
+
+```{r now lets animate...}
+#too alter size of gif created, see https://stackoverflow.com/questions/49058567/define-size-for-gif-created-by-gganimate-change-dimension-resolution
+
+library(gganimate) #to make this work, you might also have to install the gifski library
+library(ggnewscale) #http://gradientdescending.com/how-to-use-multiple-color-scales-in-ggplot-with-ggnewscale/
+library('viridis')
+
+#specify region to plot    
+lonLimits=c(-100.0,-60) #longitude of corners
+latLimits=c(15.0,50.0) #latitude of corners
+
+#get initial distribution of particles
+
+dpad=0.0
+p<-ggplot(data = world) + 
+  scale_colour_gradientn(colours=hcl.colors(4,palette='plasma'))+
+  geom_sf() + 
+      coord_sf(xlim= c(lonLimits[1]-dpad, lonLimits[2]+dpad), 
+               ylim = c(latLimits[1]-dpad,latLimits[2]+dpad), expand = FALSE)+
+      geom_point(data = whereAllWentAllPLD1, aes(x = lonTo, y = latTo,
+                                                fill=log10(fracTo),
+                                            colour=log10(fracTo)), 
+                 size = 1, shape = 23)+
+  #geom_point(data=whereAllStarted1,aes(x=lonFrom,y=latFrom),colour='green')+
+  new_scale_colour() +  
+  geom_point(data = whereAllWentAllPLD2, aes(x = lonTo, y = latTo,
+                                                fill=log10(fracTo),
+                                            colour=log10(fracTo)), 
+                 size = 1, shape = 23)+
+  scale_colour_gradientn(colours=hcl.colors(4,palette='viridis'))+
+  #geom_point(data=whereAllStarted2,aes(x=lonFrom,y=latFrom),colour='green')+
+
+  #gganimate specific bits
+  labs(title=paste(titleStr,'PLD: {current_frame} days'))+transition_manual(PLD)
+
+anim_save(paste('connectivityData/twoStarts','.gif',sep=''),p)
+print(p)    
+```
+
+If you are running this interactively, and can't find your plot in the plot window, either load the file `dispersalExpand.gif` into your browser, or type `print(p)`... Also look at any error messages that are generated -- you may need to install the `gifski` package.
