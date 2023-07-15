@@ -29,7 +29,7 @@ Use the dispersal data calculated in save_DispersalData_fromRegion.R or save_Dis
 
 ```{r load data from RDS}
 dataFileName1='connectivityData/AprMayJune_EastFlorida'; titleStr='April-June climatological release'
-dataFileName2='connectivityData/AprMayJune_QuintanaRoo'; titleStr='April-June climatological release, 1m initial depth, log10(particle density),'
+dataFileName2='connectivityData/AprMayJune_QuintanaRoo'; titleStr='April-June climatological release, 1m initial depth,\nlog10(particle density),'
 whereAllWentAllPLD1<-readRDS(paste(dataFileName1,'.RDS',sep=''))
 whereAllStarted1<-readRDS(paste(dataFileName1,'_startPoints.RDS',sep=''))
 whereAllWentAllPLD2<-readRDS(paste(dataFileName2,'.RDS',sep=''))
@@ -69,7 +69,7 @@ p<-ggplot(data = world) +
   #geom_point(data=whereAllStarted2,aes(x=lonFrom,y=latFrom),colour='green')+
 
   #gganimate specific bits
-  labs(title=paste(titleStr,'PLD: {current_frame} days'))+transition_manual(PLD)
+  labs(title=paste(titleStr,'\nTime since release: {current_frame} days'))+transition_manual(PLD)
 
 anim_save(paste('connectivityData/twoStarts','.gif',sep=''),p)
 print(p)    
