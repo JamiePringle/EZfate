@@ -5,7 +5,7 @@
 <p align="center">
   <img src="https://jamiepringle.github.io/EZfate/twoStarts_EastFL_MxQR_AprMayJun.gif"><br>
   <em>Climatological dispersal of particles released from Quintana Roo, Mexico, and the East Coast of Florida, USA over 18 days. Particles released at 1m, can vary in depth. Colors represent log of fraction of particles released which reach a point. Code to produce this plot is in code directory, and is in two files:</em> <tt>animate_DispersalData_from_two_Regions.Rmd</tt> <em>and</em> <tt>save_DispersalData_fromRegion.R</tt>.
-</p>
+</p> 
 
 This repository contains code for analyzing precomputed Lagrangian pathways in the coastal ocean from the Mercator System For Global Ocean Physical Analysis At 1/12° as described [in this data sheet](https://www.mercator-ocean.eu/wp-content/uploads/2017/02/SYSTEM-sheet-_PSY4V3R1_2017.pdf). The particle tracking was made with oceanParcels, a python package described in at [oceanparcels.org](https://oceanparcels.org/).
 
