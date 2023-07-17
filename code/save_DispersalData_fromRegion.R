@@ -20,17 +20,44 @@ for (minPLD in seq(2,18,2)) {
   for (regionName in c('theAmericas')) {
     print(paste('working on',regionName))
     
-    #define depth and year/climatology and vertical behavior
-    depth<-1; depthName=paste('_',as.character(depth),'m',sep='')
-    year<-'climatology'
-    verticalBehavior<-'starts'
+    #set up geographical subregion to get data from
+    #define polyName, which specifies the root of the filename
+    #the data will be stored in 
+    if (FALSE) {
+      polyName<-'EastFlorida'
+      lonLimits=c(-82.0,-80) #longitude of corners
+      latLimits=c(28.0,30.0) #latitude of corners
+      limitPoly=st_polygon(list(cbind(lonLimits[c(1,2,2,1,1)],latLimits[c(1,1,2,2,1)])))
+    } else if (FALSE) {
+      polyName<-'QuintanaRoo' #from 17.491481, -88.148592
+      lonLimits=c(-88.14,-88.14+2.0) #longitude of corners
+      latLimits=c(17.49,17.49+2.0) #latitude of corners
+      limitPoly=st_polygon(list(cbind(lonLimits[c(1,2,2,1,1)],latLimits[c(1,1,2,2,1)])))
+    } else if (TRUE) {
+      polyName<-'CODE_region' #Coastal Ocean Dynamics Region, 
+      #coastal points 38.27, -122.99 and 40.29, -124.35
+      lonLimits=c(-123.0-2.0,123.0) #longitude of corners
+      latLimits=c(38.272,38.272+2.0) #latitude of corners
+      limitPoly=st_polygon(list(cbind(c(-122.99,-124.25,-126.35,-124.99,-122.99),
+                                      c(  38.27,  40.29,  40.29,  38.27,  38.27))))
+    }
     
-    PLDname=paste('PLD',as.character(minPLD),sep=''); maxPLD<-minPLD
+    #define depth and year/climatology and vertical behavior. This information
+    #will be added to polyName
+    if (TRUE) {
+      depth<-10; depthName=paste('_',as.character(depth),'m',sep='')
+      year<-'climatology'
+      verticalBehavior<-'fixed' #'starts'
+    }
+    
+    #add vertical behavior information to polyName
+    polyName<-paste(polyName,year,depthName,verticalBehavior,sep='_')
     
     #get data
     tic('getting data')
     if (TRUE) {
       timeName='AprMayJune_'
+      maxPLD<-minPLD
       month<-4; E1<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
       month<-5; E2<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
       month<-6; E3<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
@@ -48,19 +75,6 @@ for (minPLD in seq(2,18,2)) {
     #now add lat and lon to all the files, and then subset to small region
     #define limits of a box that defines the release locations
     tic('add lat lons')
-    if (FALSE) {
-      polyName<-'EastFlorida'
-      lonLimits=c(-82.0,-80) #longitude of corners
-      latLimits=c(28.0,30.0) #latitude of corners
-      limitPoly=st_polygon(list(cbind(lonLimits[c(1,2,2,1,1)],latLimits[c(1,1,2,2,1)])))
-    } else {
-      polyName<-'QuintanaRoo' #from 17.491481, -88.148592
-      lonLimits=c(-88.14,-88.14+2.0) #longitude of corners
-      latLimits=c(17.49,17.49+2.0) #latitude of corners
-      limitPoly=st_polygon(list(cbind(lonLimits[c(1,2,2,1,1)],latLimits[c(1,1,2,2,1)])))
-    }
-    
-    
     limitPoly<-st_sfc(limitPoly,crs=4326) #make into a surface, 4326 is WGS84
     E1<-addLatLon(E1)
     E2<-addLatLon(E2)

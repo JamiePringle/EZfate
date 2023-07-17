@@ -28,8 +28,13 @@ class(world)
 Use the dispersal data calculated in save_DispersalData_fromRegion.R or save_DispersalData_fromRegion.Rmd to make an animated dispersal diagram.
 
 ```{r load data from RDS}
-dataFileName1='connectivityData/AprMayJune_EastFlorida'; titleStr='April-June climatological release'
-dataFileName2='connectivityData/AprMayJune_QuintanaRoo'; titleStr='April-June climatological release, 1m initial depth,\nlog10(particle density),'
+if (FALSE){
+  dataFileName1='connectivityData/AprMayJune_EastFlorida'; titleStr='April-June climatological release'
+  dataFileName2='connectivityData/AprMayJune_QuintanaRoo'; titleStr='April-June climatological release, 1m initial depth,\nlog10(particle density),'
+} else {
+  dataFileName1='connectivityData/AprMayJune_CODE_region_climatology__1m_starts'; titleStr='April-June climatological release'
+  dataFileName2='connectivityData/AprMayJune_CODE_region_climatology__10m_fixed'; titleStr='April-June climatological release, 1 and 10m initial depth,\nlog10(particle density),'
+}
 whereAllWentAllPLD1<-readRDS(paste(dataFileName1,'.RDS',sep=''))
 whereAllStarted1<-readRDS(paste(dataFileName1,'_startPoints.RDS',sep=''))
 whereAllWentAllPLD2<-readRDS(paste(dataFileName2,'.RDS',sep=''))
@@ -43,11 +48,16 @@ library(gganimate) #to make this work, you might also have to install the gifski
 library(ggnewscale) #http://gradientdescending.com/how-to-use-multiple-color-scales-in-ggplot-with-ggnewscale/
 library('viridis')
 
-#specify region to plot    
-lonLimits=c(-100.0,-60) #longitude of corners
-latLimits=c(15.0,50.0) #latitude of corners
-
-#get initial distribution of particles
+#specify region to plot
+if (FALSE) {
+  #Gulf of Mex and East Coast
+  lonLimits=c(-105.0,-60) #longitude of corners
+  latLimits=c(8.0,50.0) #latitude of corners
+} else if (TRUE) {
+  #Central California
+  lonLimits=c(-126.8-4,-120.42+1) 
+  latLimits=c(34.46-2,42.0+3)
+}
 
 dpad=0.0
 p<-ggplot(data = world) + 
