@@ -31,9 +31,15 @@ Use the dispersal data calculated in save_DispersalData_fromRegion.R or save_Dis
 if (FALSE){
   dataFileName1='connectivityData/AprMayJune_EastFlorida'; titleStr='April-June climatological release'
   dataFileName2='connectivityData/AprMayJune_QuintanaRoo'; titleStr='April-June climatological release, 1m initial depth,\nlog10(particle density),'
-} else {
+} else if (FALSE) {
   dataFileName1='connectivityData/AprMayJune_CODE_region_climatology__1m_starts'; titleStr='April-June climatological release'
   dataFileName2='connectivityData/AprMayJune_CODE_region_climatology__10m_fixed'; titleStr='April-June climatological release, 1 and 10m initial depth,\nlog10(particle density),'
+} else if (FALSE) {
+  dataFileName1='connectivityData/AprMayJune_CODE_region_climatology_1m_starts_trimmedToLand'; titleStr='April-June climatological release, 1 and 20m initial depth,\nlog10(particle density),'
+  dataFileName2='connectivityData/AprMayJune_CODE_region_climatology_20m_fixed_trimmedToLand'; titleStr='April-June climatological release, 1 and 20m initial depth,\nlog10(particle density),'
+} else if (TRUE) {
+  dataFileName1='connectivityData/MayJuneJuly_CODE_region_climatology_1m_starts_trimmedToLand'; titleStr='May-July climatological release, 1 and 20m initial depth,\nlog10(particle density),'
+  dataFileName2='connectivityData/MayJuneJuly_CODE_region_climatology_20m_fixed_trimmedToLand'; titleStr='May-July climatological release, 1 and 20m initial depth,\nlog10(particle density),'
 }
 whereAllWentAllPLD1<-readRDS(paste(dataFileName1,'.RDS',sep=''))
 whereAllStarted1<-readRDS(paste(dataFileName1,'_startPoints.RDS',sep=''))

@@ -30,8 +30,13 @@ Use the dispersal data calculated in save_DispersalData_fromRegion.R or save_Dis
 ```{r load data from RDS}
 #dataFileName='connectivityData/AprMayJune_EastFlorida'; titleStr='April-June climatological release'
 #dataFileName='connectivityData/AprMayJune_QuintanaRoo'; titleStr='April-June climatological release'
-dataFileName<-'connectivityData/AprMayJune_CODE_region_climatology__1m_starts'; titleStr<-'April-June CODE region climatological release'
-dataFileName<-'connectivityData/AprMayJune_CODE_region_climatology__10m_fixed'; titleStr<-'April-June CODE region climatological release'
+#dataFileName<-'connectivityData/AprMayJune_CODE_region_climatology_1m_starts_trimmedToLand'; titleStr<-'April-June CODE region climatological release'
+#dataFileName<-'connectivityData/AprMayJune_CODE_region_climatology_20m_fixed_trimmedToLand'; titleStr<-'April-June CODE region climatological release'
+dataFileName<-'connectivityData/MayJuneJuly_CODE_region_climatology_1m_starts_trimmedToLand'; titleStr<-'May-July CODE region climatological release'
+dataFileName<-'connectivityData/MayJuneJuly_CODE_region_climatology_20m_fixed_trimmedToLand'; titleStr<-'May-July CODE region climatological release'
+#dataFileName<-'connectivityData/AprMayJune_CODE_region_climatology__10m_fixed'; titleStr<-'April-June CODE region climatological release'
+#dataFileName<-'connectivityData/AprMayJune_CODE_region_climatology__20m_fixed'; titleStr<-'April-June CODE region climatological release'
+
 whereAllWentAllPLD<-readRDS(paste(dataFileName,'.RDS',sep=''))
 whereAllStarted<-readRDS(paste(dataFileName,'_startPoints.RDS',sep=''))
 ```
@@ -60,7 +65,7 @@ p<-ggplot(data = world) + geom_sf() +
                                                 fill=log10(fracTo),
                                             colour=log10(fracTo)), 
                  size = 1, shape = 23)+
-  geom_point(data=whereAllStarted,aes(x=lonFrom,y=latFrom),colour='green',alpha=0.1)+
+  #geom_point(data=whereAllStarted,aes(x=lonFrom,y=latFrom),colour='green',alpha=0.1)+
   #gganimate specific bits
   labs(title=paste(titleStr,'PLD: {current_frame} days'))+transition_manual(PLD)
 

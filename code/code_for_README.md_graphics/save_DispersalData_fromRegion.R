@@ -45,32 +45,42 @@ for (minPLD in seq(2,18,2)) {
     #define depth and year/climatology and vertical behavior. This information
     #will be added to polyName
     if (TRUE) {
-      depth<-10; depthName=paste('_',as.character(depth),'m',sep='')
+      depth<-1; depthName=paste('_',as.character(depth),'m',sep='')
       year<-'climatology'
-      verticalBehavior<-'fixed' #'starts'
+      verticalBehavior<-'starts' 
+      #verticalBehavior<-'fixed'
     }
     
     #add vertical behavior information to polyName
-    polyName<-paste(polyName,year,depthName,verticalBehavior,sep='_')
+    polyName<-paste(polyName,'_',year,depthName,'_',verticalBehavior,sep='')
     
     #get data
     tic('getting data')
-    if (TRUE) {
+    if (FALSE) {
       timeName='AprMayJune_'
       maxPLD<-minPLD
       month<-4; E1<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
       month<-5; E2<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
       month<-6; E3<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
-    } 
+    } else {
+      timeName='MayJuneJuly_'
+      maxPLD<-minPLD
+      month<-5; E1<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
+      month<-6; E2<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
+      month<-7; E3<-getConnectivityData(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD)
+    }
     toc()
     
-    #trim to land
-    #tic(paste('have trimmed',regionName))
-    #trimTo=TRUE
-    #E1<-subsetConnectivity_byGridValue(E1,gridDist,0.0,2.1,trimTo=trimTo)
-    #E2<-subsetConnectivity_byGridValue(E2,gridDist,0.0,2.1,trimTo=trimTo)
-    #E3<-subsetConnectivity_byGridValue(E3,gridDist,0.0,2.1,trimTo=trimTo)
-    #toc() 
+    #if True trim to land
+    if (TRUE) {
+      tic(paste('have trimmed',regionName))
+      polyName<-paste(polyName,'_trimmedToLand',sep='')
+      trimTo=FALSE
+      E1<-subsetConnectivity_byGridValue(E1,gridDist,0.0,2.1,trimTo=trimTo)
+      E2<-subsetConnectivity_byGridValue(E2,gridDist,0.0,2.1,trimTo=trimTo)
+      E3<-subsetConnectivity_byGridValue(E3,gridDist,0.0,2.1,trimTo=trimTo)
+      toc() 
+    }
     
     #now add lat and lon to all the files, and then subset to small region
     #define limits of a box that defines the release locations
