@@ -45,6 +45,8 @@ Besides defining the functions we need to subset the habitat, `connectivityUtili
     print(p)
 ```
 
+Note that when considering particles launched at 10, 20 or 40m, it will be more useful to use the grid-distance or the physical distance from the 10, 20 or 40m isobaths. These are provided in variables loaded by `connectivityUtilities.R` called `gridDist_10m, gridDist_20m` and `gridDist_40m` or `gridDistKm_10m, gridDistKm_20m` and `gridDistKm_40m`, respectively.
+
 In `connectivityUtilities.R`, a function `subsetConnectivity_byGridValue` is defined which takes one of the quantities defined on the model grid and uses it to subset the connectivity data. It is called with`subsetConnectivity_byGridValue(E,gridValues,minValue,maxValue,trimTo=FALSE)` where
 
 -   `E` is the existing connectivity data

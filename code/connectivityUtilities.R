@@ -182,8 +182,23 @@ data<-getGridData()
 lon<-ncvar_get(data,'nav_lon')
 lat<-ncvar_get(data,'nav_lat')
 gridDepth<-ncvar_get(data,'depth') #the ocean depth on model grid
+
+#this gets distance from land in km and grid units
 gridDist<-ncvar_get(data,'gridDist') #the distance from land in gridCells
 gridDistKm<-ncvar_get(data,'dist') #the distance from land in kilometers
+
+#this gets distance from ground shallower than 10m in km and grid units
+gridDist_10m<-ncvar_get(data,'gridDist_10m') #the distance from land in gridCells
+gridDistKm_10m<-ncvar_get(data,'dist_10m') #the distance from land in kilometers
+
+#this gets distance from ground shallower than 20m in km and grid units
+gridDist_20m<-ncvar_get(data,'gridDist_20m') #the distance from land in gridCells
+gridDistKm_20m<-ncvar_get(data,'dist_20m') #the distance from land in kilometers
+
+#this gets distance from ground shallower than 20m in km and grid units
+gridDist_40m<-ncvar_get(data,'gridDist_40m') #the distance from land in gridCells
+gridDistKm_40m<-ncvar_get(data,'dist_40m') #the distance from land in kilometers
+
 
 #shut dplyr.summarise up...
 options(dplyr.summarise.inform = FALSE) #when using summarize below, it gets _way_ to chatty
