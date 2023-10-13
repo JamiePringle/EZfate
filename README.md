@@ -21,7 +21,7 @@ Global pathway calculation is underway now for years 2007-2022. The status of de
 
 |Depth|Fixed Depth Behavior|Variable Depth Behavior|
 |-----|--------------------|-----------------------|
-| 1m |  | Done|
+| 1m | Done | Done|
 |10m | Done| |
 |20m | Done| |
 |40m | Done | |
