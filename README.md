@@ -9,7 +9,7 @@
 
 This repository contains code for analyzing precomputed Lagrangian pathways in the coastal ocean from the Mercator System For Global Ocean Physical Analysis At 1/12° as described [in this data sheet](https://www.mercator-ocean.eu/wp-content/uploads/2017/02/SYSTEM-sheet-_PSY4V3R1_2017.pdf). The particle tracking was made with oceanParcels, a python package described in at [oceanparcels.org](https://oceanparcels.org/).
 
-For instructions on how to download and use this code, go to [the instructions in the docs directory](https://jamiepringle.github.io/EZfate/)
+For instructions on how to download and use this code, go to [the instructions in the docs directory](https://jamiepringle.github.io/EZfate/) . If you wish to read the data into python, contact me and I can show you how to access the Zarr files with the connectivity data. 
 
 By September 2023, the data and software will produce estimates of connectivity for indvidual months and climatological months for particles released at 1m, 10m, 20m, and 40m depths and drifting for 2, 4, 8 ... 60 days for all locations within 100km of the coast or depths of less than 500m. The particles can either be fixed to their initial depth or allowed to advect to different depths by the grid-scale vertical velocity. In the future more depths will be added, along with the vertical dispersal of particles by turbulence as computed by the ocean model. 
 
