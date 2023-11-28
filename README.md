@@ -30,7 +30,7 @@ This work is supported by NSF project OCE 1947954.
 
 **_Suggested Citation_**
 > Pringle, J.M. (2023). EZfate, a tool for estimating larval connectivity in the global coastal ocean [Computer software].
-> https://zenodo.org/badge/569445832.svg)](https://zenodo.org/doi/10.5281/zenodo.10214924)
+> [![DOI](https://zenodo.org/badge/569445832.svg)](https://zenodo.org/doi/10.5281/zenodo.10214924)
 
 **_Suggested Acknowledgment_**
 
