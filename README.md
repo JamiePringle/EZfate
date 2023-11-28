@@ -28,4 +28,12 @@ Global pathway calculation is underway now for years 2007-2022. The status of de
 
 This work is supported by NSF project OCE 1947954.  
 
+**_Suggested Citation_**
+> Pringle, J.M. (2023). EZfate, a tool for estimating larval connectivity in the global coastal ocean [Computer software].
+> https://zenodo.org/badge/569445832.svg)](https://zenodo.org/doi/10.5281/zenodo.10214924)
+
+**_Suggested Acknowledgment_**
+
+> A portion of this work used code provided by Jamie Pringle's EZfate package (https://zenodo.org/doi/10.5281/zenodo.10214924).
+
 # Please direct questions to James Pringle, University of New Hampshire, jpringle@unh.edu. 
