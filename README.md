@@ -23,7 +23,7 @@ Global pathway calculation is underway now for years 2007-2022. The status of de
 |-----|--------------------|-----------------------|
 | 1m | Done | Done (updated 12/2023)|
 |10m | Done| Done |
-|20m | Done| |
+|20m | Done| Done |
 |40m | Done | |
 
 This work is supported by NSF project OCE 1947954.  
