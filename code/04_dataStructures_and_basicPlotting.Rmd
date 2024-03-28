@@ -39,7 +39,7 @@ To plot all of the starting locations, plot all the (lonTo,latTo) points. In the
     print(p) #this makes the figure appear
 ```
 
-# Plot where particles go
+# Plot where particles starting in a polygon go
 
 Now lets look at where all the particles released in a small region go in the 18 day drifting duration of this data. First, define a polygon that encompasses the region where the particles are released:
 
@@ -89,6 +89,49 @@ and now we can plot the starting points from `(EstartPoints$lonFrom,EstartPoints
     p<-p+geom_point(data = EstartPoints, aes(x = lonFrom, y = latFrom), size = 0.5, shape = 23, fill = "green",color='green')
     print(p) #this makes the figure appear
 ```
+
+# Plot where particles starting at a point go
+
+Sometimes you just want to know where particles from a particular point go. This is also straightforward. First define a latitude and longitude where you want the particles to be released from, and then calculate the closest release point in the EZfate grid.
+
+```{r specify point}
+#specify a point you are interested in
+lonP<--70.600 ; latP<-42.995 #Isle of Shoals in NH and Maine
+
+#compute squared distance between lonP and latP and starting points approximately, but
+#accurately enough for this work. Answer in units of degrees lat SQUARED. This works because 
+#the length of a degree of longitude scales as cos(latitude)
+dist<-(E$latFrom-latP)^2+((E$lonFrom-lonP)*cos(E$latFrom*2*pi/360.0))**2
+
+#what row of E is the point of the minimum distance?
+nMin<-which.min(dist)
+```
+
+Now lets extract the data. Note the code to extract where the particles go, which looks like `c(E$lonTo[nMin],recursive=TRUE)`. This awkward code is necessary to extract a vector from a dataFrame. The following code also makes the data.frames to point.
+
+```{r extract where particles from the point go}
+#obtain latitude and longitude where particles released from (lonP,latP) have gone
+plotLon<-c(E$lonTo[nMin],recursive=TRUE)
+plotLat<-c(E$latTo[nMin],recursive=TRUE)
+numTo<-c(E$numTo[nMin],recursive=TRUE)
+
+#make data frames to plot
+startP=data.frame(lonP=lonP,latP=latP)
+endP=data.frame(plotLon=plotLon,plotLat=plotLat,numTo=numTo)
+```
+
+Now plot where the particles started from and where they go.
+
+```{r plot release from point}
+p<-ggplot(data = world) + geom_sf() +
+  coord_sf(xlim= c(-72, -64), ylim = c(41, 44.2), expand = FALSE)+
+  geom_point(data = endP, aes(x = plotLon, y = plotLat,color=numTo), size = 1)+
+  geom_point(data=startP, aes(x = lonP, y = latP), size = 1, shape = 23, fill = "red",color='red')+
+  labs(title='Red is starting point, shaded blue points are ending locations')
+print(p) #this makes the figure appear
+```
+
+# What next?
 
 Often we will want to model the dispersal of an organism over multiple generations, or something similar. Let us, for now, imagine modeling a semelparous organism, and imagine it starts at a specific point, and each generation it will release a certain number of larvae. Where will those larvae end up, and how many will make it?
 
