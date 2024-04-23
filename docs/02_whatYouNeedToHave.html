@@ -11,7 +11,7 @@
 
 <meta name="author" content="James Pringle" />
 
-<meta name="date" content="2023-05-17" />
+<meta name="date" content="2024-04-23" />
 
 <title>What must you have to use EZfate?</title>
 
@@ -352,7 +352,7 @@ display: none;
 
 <h1 class="title toc-ignore">What must you have to use EZfate?</h1>
 <h4 class="author">James Pringle</h4>
-<h4 class="date">2023-05-17</h4>
+<h4 class="date">2024-04-23</h4>
 
 </div>
 
@@ -386,7 +386,8 @@ library(doParallel) #optional, but highly recommend to allow parallel processing
 library(foreach) #optional, but highly recommend to allow parallel processing
 library(tictoc) #optional, only needed for debugging runs
 library(rnaturalearth) #only needed for graphics 
-library(rnaturalearthdata) #only needed for graphics</code></pre>
+library(rnaturalearthdata) #only needed for graphics
+library(aws.s3) #for reading connectivity data from NSF&#39;s Open Storage Network</code></pre>
 <p>Several issues have come up for users when installing these packages.
 First, read any error messages that occur during installation. Often,
 especially on linux, they will suggest installing additional system

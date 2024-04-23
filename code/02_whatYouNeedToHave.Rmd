@@ -36,6 +36,7 @@ library(foreach) #optional, but highly recommend to allow parallel processing
 library(tictoc) #optional, only needed for debugging runs
 library(rnaturalearth) #only needed for graphics 
 library(rnaturalearthdata) #only needed for graphics
+library(aws.s3) #for reading connectivity data from NSF's Open Storage Network
 
 
 ```

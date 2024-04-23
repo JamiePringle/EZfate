@@ -3,6 +3,7 @@ library(tidyverse,quietly=TRUE,warn.conflicts=FALSE) #get it to shut up!
 library(sf,quietly=TRUE,warn.conflicts=FALSE)
 library(collections,quietly=TRUE,warn.conflicts=FALSE)
 library(comprehenr,quietly=TRUE,warn.conflicts=FALSE)
+library(aws.s3)
 
 #if true, enable parallel operations. In general, you want to do this!
 #it makes, among other things, the combination of connectivity data 
@@ -76,11 +77,17 @@ if (TRUE) {
 # 
 # month: and integer which specifies the month of the data
 
-# We need to specify the root URL which contains the data. As configured now
-# it downloads the global data. If you wish the data for just North and South
-# america, uncomment the second line below, with a different rootDataURL
-rootDataURL<-'https://oxbow.sr.unh.edu/data/EZfateData/RcommunityConnectivityMatrices/' #global data
-# rootDataURL<-'https://oxbow.sr.unh.edu/data/RcommunityConnectivityMatrices/' #just North and South America
+# We need to specify where the data is. There are two options for storing the data; either on a
+#web server or on a S3 storage bucket. If webserver, set dataOnWeb to TRUE, and define rootDataURL.
+#If on S3 storage (like OSN), then set dataOnWeb to FALSE, and define S3* variables. When defining
+#the S3_secret, make sure to use the public one, for this one does not give write permission to the
+#data
+dataOnWeb<-FALSE
+rootDataURL<-'https://oxbow.sr.unh.edu/data/EZfateData/RcommunityConnectivityMatrices/' #URL of data if on web
+S3_base_url<-'sdsc.osn.xsede.org' #url of S3 server
+S3_bucket <- "ees230040-bucket01" #name of bucket on server
+S3_secret<-'ULWSR4EC4O6GQB4225J2' #S3 authentication. MAKE SURE TO USE PUBLIC ONE
+
 
 # and specify the layout of the files below rootDataURL; this string will be
 # processed by sprintf, and as currently defined expects
@@ -89,6 +96,32 @@ rootDataURL<-'https://oxbow.sr.unh.edu/data/EZfateData/RcommunityConnectivityMat
 # path is appropriately made on all architectures.  
 #dataLayout<-file.path('%s','allPoints','%dm','%s','%s_month%2.2d_minPLD%2.2d_maxPLD%2.2d.RDS') #for original test data
 dataLayout<-file.path('%s','%dm','%s','%s_month%2.2d_minPLD%2.2d_maxPLD%2.2d.RDS') #for global data
+
+#define a function to download data from web server
+getDataFile<-function(dataURL,downloadToFile) {
+  #dataURL is the base URL to download the data from 
+  #downloadToFile is the file to fetch from that URL
+  options(timeout = max(3000, getOption("timeout")))
+  download.file(dataURL,downloadToFile,mode='wb')
+}
+
+#define a function to download data from S3 bucket
+#this is a good guide on how to do this in R
+#https://blog.djnavarro.net/posts/2022-03-17_using-aws-s3-in-r/
+S3_getDataFile<-function(downloadPath,downloadToFile) {
+  #downloadPath is the path to get from bucket
+  #downloadToFile is the file to save to
+  print(paste('Obtaining',downloadPath,'from Open Storage Network'))
+  print(paste('Saving to',downloadToFile))
+  save_object(object = paste('EZfateData/',downloadPath,sep=''),
+              file =downloadToFile,
+              base_url='sdsc.osn.xsede.org',
+              bucket = "ees230040-bucket01",
+              secret='ULWSR4EC4O6GQB4225J2',
+              region='',
+              show_progress=TRUE
+              )
+}
 
 getConnectivityData<-function(regionName,depth,year,verticalBehavior,month,minPLD,maxPLD,dataDir='connectivityData'){
   #this code downloads into dataDir the connectivity data specified by the arguements
@@ -135,8 +168,11 @@ getConnectivityData<-function(regionName,depth,year,verticalBehavior,month,minPL
   if (file.exists(downloadToFile)) {
     print(paste('file',downloadToFile,'exists, no download'))
   } else{
-    options(timeout = max(3000, getOption("timeout")))
-    download.file(dataURL,downloadToFile,mode='wb')
+    if (dataOnWeb) {
+      getDataFile(dataURL,downloadToFile)
+    } else {
+      S3_getDataFile(paste('RcommunityConnectivityMatrices/',downloadPath,sep=''),downloadToFile)
+    }
   }
   
   #load the data.frame and return it
@@ -150,7 +186,8 @@ getGridData<-function(dataDir='connectivityData'){
   #the variable associated with the netCDF file. 
   dirName<-file.path(dataDir,'EZfateFiles')
   downloadToFile<-file.path(dataDir,'EZfateFiles','model_depth_and_distance.nc')
-  dataURL<-paste(rootDataURL,'EZfateFiles/model_depth_and_distance.nc',sep='')
+  downloadPath<-'EZfateFiles/model_depth_and_distance.nc'
+  dataURL<-paste(rootDataURL,downloadPath,sep='')
   
   if (!dir.exists(dirName)){
     print(paste('creating directory',dirName))
@@ -161,8 +198,12 @@ getGridData<-function(dataDir='connectivityData'){
   if (file.exists(downloadToFile)) {
     print(paste('file',downloadToFile,'exists, no download'))
   } else{
-    options(timeout = max(3000, getOption("timeout")))
-    download.file(dataURL,downloadToFile,mode='wb')
+    if (dataOnWeb) {
+      getDataFile(dataURL,downloadToFile)
+    } else {
+      S3_getDataFile(downloadPath,downloadToFile)  
+    }
+    
   }
   
   data<-nc_open(downloadToFile)
