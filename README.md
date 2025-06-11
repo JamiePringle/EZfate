@@ -19,14 +19,12 @@ Pathways have been calculated for the years 2007-2023 for all of the depths abov
 
  The status of depth of release and depth keeping behavior is given below. "Fixed Depth Behavior" indicates particles are only advected in horizontal directions by ocean currents and remain at their starting depth. "Variable Depth Behavior" indicates that they are advected by both horizontal and vertical currents and can vary in depth. In the table, the last year which has been completed is given. 
 
- WARNING, FROM JUNE 7 TO JUNE 14, CLIMATOLOGIES ARE BEING UPDATED TO GO FROM 2007-2024
-
 |Depth|Fixed Depth Behavior|Variable Depth Behavior|
 |-----|--------------------|-----------------------|
-| 1m | 2023 | 2023 |
-|10m | 2023 | 2023 |
-|20m | 2023 | 2023 |
-|40m | 2023 | 2023 |
+| 1m | 2024 | 2024 |
+|10m | 2024 | 2024 |
+|20m | 2024 | 2024 |
+|40m | 2024 | 2024 |
 
 This work is supported by NSF project OCE 1947954.  
 
