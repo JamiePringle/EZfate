@@ -15,9 +15,9 @@ The data and software will produce estimates of connectivity for indvidual month
 
 Monthly data for each year and climatological data for all years run are formed from twice-a-day particle releases at all locations. *Note Well:* Each year at arround June, the climatological data will change as I add the prior years data. If you want a fixed set of years included in the climatological average, either save the data you download, or download the years and regions you desire and form your own climatology (both are described in the documentation).
 
-Pathways have been calculated for the years 2007-2023 for all of the depths above for the coasts of North and South America. In the future, the prior year will be added by June of the following year. 
+Pathways have been calculated for the years 2007-2023 for all of the depths above for the coasts of North and South America. In the future, the prior year will be added by June of the following year. A preprint of a manuscript by Will Lush validating the drifter tracks against data from the global drifter project, now accepted into JGR-Biogeosciences, can be found [here.](https://essopenarchive.org/users/860936/articles/1252708-drifting-along-a-global-validation-of-climatologies-of-numerical-dispersal-over-the-continental-shelf-using-trajectories-from-the-global-drifter-program?commit=9a133c15e2e53a2d3182d53974e9b7ad17d0ff79)
 
- The status of depth of release and depth keeping behavior is given below. "Fixed Depth Behavior" indicates particles are only advected in horizontal directions by ocean currents and remain at their starting depth. "Variable Depth Behavior" indicates that they are advected by both horizontal and vertical currents and can vary in depth. In the table, the last year which has been completed is given. 
+The status of depth of release and depth keeping behavior is given below. "Fixed Depth Behavior" indicates particles are only advected in horizontal directions by ocean currents and remain at their starting depth. "Variable Depth Behavior" indicates that they are advected by both horizontal and vertical currents and can vary in depth. In the table, the last year which has been completed is given. 
 
 |Depth|Fixed Depth Behavior|Variable Depth Behavior|
 |-----|--------------------|-----------------------|
