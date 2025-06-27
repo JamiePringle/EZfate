@@ -1,6 +1,6 @@
 # EZfate -- global estimates of connectivity in and near the coastal ocean. 
 
-## Software in R for obtaining and analyzing precomputed Lagrangian Pathways computed with currents from the Mercator 1/12th degree ocean model
+## Software in R and Python for obtaining and analyzing precomputed Lagrangian Pathways computed with currents from the Mercator 1/12th degree ocean model
 
 <p align="center">
   <img src="https://jamiepringle.github.io/EZfate/twoStarts_EastFL_MxQR_AprMayJun.gif"><br>
@@ -29,7 +29,7 @@ The status of depth of release and depth keeping behavior is given below. "Fixed
 This work is supported by NSF project OCE 1947954.  
 
 **_Python software_**
-If you wish to analyze the data using python, contact me, and I shall share my beta-version python code. The code is feature complete (it is used to calculate the R data shared above), but has not yet been fully documented. 
+If you wish to analyze the data using python, look in the directory `python_code` and the documentation [here](https://jamiepringle.github.io/EZfate/EZfate_python_guide.html). The code is feature complete (it is used to calculate the R data shared above), but has not yet been fully documented. However the documentation linked to above and the well documented examples and utility routines should be enough to get started. Email me if you have questions.  
 
 **_Suggested Citation_**
 > Pringle, J.M. (2023). EZfate, a tool for estimating larval connectivity in the global coastal ocean [Computer software].
