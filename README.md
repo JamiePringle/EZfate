@@ -31,6 +31,9 @@ This work is supported by NSF project OCE 1947954.
 **_Python software_**
 If you wish to analyze the data using python, look in the directory `python_code` and the documentation [here](https://jamiepringle.github.io/EZfate/EZfate_python_guide.html). The code is feature complete (it is used to calculate the R data shared above), but has not yet been fully documented. However the documentation linked to above and the well documented examples and utility routines should be enough to get started. Email me if you have questions.  
 
+**_Code to create pathways_**
+If you wish to see the code that created all of the connectivity data shared as part of EZfate, it is posted as [the second issue in this repository](https://github.com/JamiePringle/EZfate/issues/2). Note that the structure of this code is highly focused on efficiency, and not at all on generality. If you are just getting started with oceanParcels, I strongly suggest you go to their web page and view there more general and easier to follow examples.  
+
 **_Suggested Citation_**
 > Pringle, J.M. (2023). EZfate, a tool for estimating larval connectivity in the global coastal ocean [Computer software].
 > [![DOI](https://zenodo.org/badge/569445832.svg)](https://zenodo.org/doi/10.5281/zenodo.10214924)
