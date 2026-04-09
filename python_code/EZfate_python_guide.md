@@ -7,12 +7,18 @@ All of this description will make more sense if you spend some time reading at l
 
 #### Python packages you need
 
-The codes I provide expect that the following python modules exist on your system. They are all easily installed with conda:
+The codes I provide expect that the following python modules exist on your system. They are all easily installed with conda. The one thing to note is that for now, you must install version 2 of zarr, for version 3 does not include support for ragged arrays. 
 
 * numpy
 * matplotlib
-* zarr
+* zarr **version 2**
 * netCDF4
+
+You can make a working environment with conda with the following command:
+```bash
+conda create -n EZfateUse -c conda-forge numpy ipython matplotlib dask netCDF4 cartopy zarr=2 xarray scikit-learn numba s3fs tqdm
+conda activate EZfateUse
+```
 
 #### Data structures
 EZfate provides two main data structures, the forward connectivity `E` and the backwards connectivity `Etranspose`. These are best thought of as sparce matrices that define where all the particles released at one location go (`E`) and where all particles released at one location came from (`Etranspose`). The two data structures are stored as Zarr files which are downloaded by `getEZfateFromOSN.py`, described below. They have been precomputed globally for all months from 2007 to last year, as is described on the EZfate GitHub page.  Climatological connectivity is also provided. 

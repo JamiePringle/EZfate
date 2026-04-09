@@ -823,7 +823,7 @@ def combineConnectivity(A,B,runFast=True):
     chunkSize=A['nxFrom'].chunks[0]
     startThisChunk=0
     while startThisChunk <lenA:
-        thisChunkSize=min(chunkSize,lenA-startThisChunk) #on last loop, should == lenA 
+        thisChunkSize=min((chunkSize,lenA-startThisChunk)) #on last loop, should == lenA 
 
         #get a chunk. Do a deep copy for the ones that will be
         #altered. Why? For reasons I don't understand, the object

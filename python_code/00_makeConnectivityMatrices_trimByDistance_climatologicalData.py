@@ -38,13 +38,17 @@ import getEZfateFromOSN
 if not os.path.exists('connectivity'):
     os.makedirs('connectivity')
 
-#Define where data we download will be saved. The data is cached here,
-#so that we don't keep downloading data. However, the directory can
-#get rather large. Any file in it can be deleted, as it will be
+#The downloaded data is cached in a local directory, OSNdataDir, so
+#that we don't keep downloading data. However, the directory can get
+#rather large. Any file in it can be deleted, as it will be
 #re-downloaded if necessary. If you want to re-download the data (for
 #example, to get an updated climatology file), then the file must be
 #deleted from this directory. This directory is created if it does not
-#exist
+#exist. IF YOU WANT TO KEEP THE DATA ELSEWERE, make a symbolic link
+#from the OSNdataDir in this directory to the location where the data
+#will be stored
+
+#do not alter this variable
 OSNdataDir='EZfateData/communityConnectivityMatrices/'
 
 #make the function that will calculate the connectivity matrix and its
@@ -143,7 +147,7 @@ def makeConnectivityAndTranspose(driftTimeDays):
             #if a habitat is defined with distance from land
             #defined as gridcells from land, then we need to get
             #distance from land dictionary
-            gridDict=mcm.getGridDistanceDict(matIn.nxFrom[:],matIn.nyFrom[:],landThresh=max(2.1,depth))
+            gridDict=mcm.getGridDistanceDict(matIn.nxFrom[:],matIn.nyFrom[:],landThresh=max((2.1,depth)))
 
             #trim to all points within gridRadius of land
             #keep all true points, even if they fall outside of To, so we can

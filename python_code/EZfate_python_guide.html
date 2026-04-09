@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang xml:lang>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Ezfate_python_guide</title>
+  <title>EZfate_python_guide</title>
   <style>
+
 html {
 color: #1a1a1a;
 background-color: #fdfdfd;
@@ -88,6 +89,7 @@ border-left: 2px solid #e6e6e6;
 color: #606060;
 }
 code {
+white-space: pre-wrap;
 font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
 font-size: 85%;
 margin: 0;
@@ -151,7 +153,6 @@ padding-left: 0;
 #TOC a:not(:hover) {
 text-decoration: none;
 }
-code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
 div.column{flex: auto; overflow-x: auto;}
@@ -238,13 +239,16 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 <p>All of this description will make more sense if you spend some time reading at least the introduction to EZfate given at its GitHub page <a href="https://github.com/JamiePringle/EZfate">here</a>.</p>
 <section id="python-packages-you-need" class="level4">
 <h4>Python packages you need</h4>
-<p>The codes I provide expect that the following python modules exist on your system. They are all easily installed with conda:</p>
+<p>The codes I provide expect that the following python modules exist on your system. They are all easily installed with conda. The one thing to note is that for now, you must install version 2 of zarr, for version 3 does not include support for ragged arrays.</p>
 <ul>
 <li>numpy</li>
 <li>matplotlib</li>
-<li>zarr</li>
+<li>zarr <strong>version 2</strong></li>
 <li>netCDF4</li>
 </ul>
+<p>You can make a working environment with conda with the following command:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> create <span class="at">-n</span> EZfateUse <span class="at">-c</span> conda-forge numpy ipython matplotlib dask netCDF4 cartopy zarr=2 xarray scikit-learn numba s3fs tqdm</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate EZfateUse</span></code></pre></div>
 </section>
 <section id="data-structures" class="level4">
 <h4>Data structures</h4>
@@ -268,23 +272,23 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; }
 <section id="nxny-to-longitudelatitude" class="level4">
 <h4>(nx,ny) to (longitude,latitude)</h4>
 <p>As part of the data distributed, the model grid for the GLORYS model is provided. It can be fetched with the provided <code>getEZfateFromOSN.py</code> module, and used to convert vectors of <code>nx,ny</code> to longitude and latitude with the following code.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> getEZfateFromOSN</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> netCDF4 <span class="im">as</span> nc</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#get the file which contains the bathymetry and grid data for the mercator ocean model and for</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#the connectivity files</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>maskFile<span class="op">=</span><span class="st">&#39;EZfateData/EZfateFiles/ext-PSY4V3R1_mesh_zgr.nc&#39;</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>maskFile<span class="op">=</span>getEZfateFromOSN.getFileFromOSN(maskFile)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> nc.Dataset(maskFile,<span class="st">&#39;r&#39;</span>) <span class="im">as</span> gridData:</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    lonMat<span class="op">=</span>gridData[<span class="st">&#39;nav_lon&#39;</span>][:]</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    latMat<span class="op">=</span>gridData[<span class="st">&#39;nav_lat&#39;</span>][:]</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co">#write a function that takes a vector of nx grid locations and ny</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co">#locations and returns vectors of longitude and latitude.</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> nxny2lonlat(nxVec,nyVec):</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    lonVec<span class="op">=</span>array([lonMat[p] <span class="cf">for</span> p <span class="kw">in</span> <span class="bu">zip</span>(nyVec,nxVec)])</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    latVec<span class="op">=</span>array([latMat[p] <span class="cf">for</span> p <span class="kw">in</span> <span class="bu">zip</span>(nyVec,nxVec)])</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lonVec,latVec</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> getEZfateFromOSN</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> netCDF4 <span class="im">as</span> nc</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#get the file which contains the bathymetry and grid data for the mercator ocean model and for</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#the connectivity files</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>maskFile<span class="op">=</span><span class="st">&#39;EZfateData/EZfateFiles/ext-PSY4V3R1_mesh_zgr.nc&#39;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>maskFile<span class="op">=</span>getEZfateFromOSN.getFileFromOSN(maskFile)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> nc.Dataset(maskFile,<span class="st">&#39;r&#39;</span>) <span class="im">as</span> gridData:</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    lonMat<span class="op">=</span>gridData[<span class="st">&#39;nav_lon&#39;</span>][:]</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    latMat<span class="op">=</span>gridData[<span class="st">&#39;nav_lat&#39;</span>][:]</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">#write a function that takes a vector of nx grid locations and ny</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">#locations and returns vectors of longitude and latitude.</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> nxny2lonlat(nxVec,nyVec):</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    lonVec<span class="op">=</span>array([lonMat[p] <span class="cf">for</span> p <span class="kw">in</span> <span class="bu">zip</span>(nyVec,nxVec)])</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    latVec<span class="op">=</span>array([latMat[p] <span class="cf">for</span> p <span class="kw">in</span> <span class="bu">zip</span>(nyVec,nxVec)])</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lonVec,latVec</span></code></pre></div>
 </section>
 <section id="example-files" class="level4">
 <h4>Example files</h4>

@@ -254,7 +254,7 @@ if __name__=="__main__":
                 matIn=zarr.open(matInFile,'r')
 
                 #get distance from land dictionary
-                gridDict=mcm.getGridDistanceDict(matIn.nxFrom[:],matIn.nyFrom[:],landThresh=max(2.1,depth))
+                gridDict=mcm.getGridDistanceDict(matIn.nxFrom[:],matIn.nyFrom[:],landThresh=max((2.1,depth)))
 
                 #trim to all points within gridRadius of land
                 print('trimming by distance from land')
